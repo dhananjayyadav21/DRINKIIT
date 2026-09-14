@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+
+# JSON-file-backed data store
+src/data/files/
