@@ -1,0 +1,155 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 20% 20%, #1b1330 0%, #0a0b10 45%, #0a0b10 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 28px 22px;
+  backdrop-filter: blur(20px);
+}
+
+@media (min-width: 480px) {
+  .card {
+    padding: 36px 32px;
+  }
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.3);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #f5f5f7;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #8b8fa3;
+  margin: 0 0 26px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #c3c6d4;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 14px;
+  color: #f2f3f5;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.passwordWrap {
+  position: relative;
+  display: flex;
+}
+
+.passwordWrap .input {
+  padding-right: 42px;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #767a8f;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.eyeButton:hover {
+  color: #d1d3de;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.input::placeholder {
+  color: #565a6b;
+}
+
+.input:focus {
+  border-color: #8b8cf6;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 3px rgba(139, 140, 246, 0.15);
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.submit {
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 9px;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(99, 102, 241, 0.4);
+}

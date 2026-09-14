@@ -55,6 +55,10 @@ export class JsonCollection<T extends BaseRecord> {
     return this.findOne((r) => r.id === id);
   }
 
+  findAll(): T[] {
+    return [...this.records];
+  }
+
   async insert(data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
     const now = new Date().toISOString();
     const record = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, ...data } as T;

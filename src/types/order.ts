@@ -1,6 +1,6 @@
 import { ProductCode } from '@/config/products';
 
-export type OrderStatus = 'PENDING_VERIFICATION' | 'VERIFIED' | 'AWAITING_PAYMENT' | 'CONFIRMED' | 'CANCELLED';
+export type OrderStatus = 'PENDING_VERIFICATION' | 'VERIFIED' | 'AWAITING_PAYMENT' | 'CONFIRMED' | 'CANCELLED' | 'DELIVERED';
 
 export type PaymentMethod = 'COD' | 'ONLINE' | null;
 

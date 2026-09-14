@@ -7,6 +7,10 @@ export function findById(id: string): Order | null {
   return orders.findById(id);
 }
 
+export function findAll(): Order[] {
+  return orders.findAll();
+}
+
 export function create(data: Partial<Order> & Pick<Order, 'customer' | 'waId' | 'product' | 'quantity' | 'amount' | 'otp' | 'otpExpiresAt'>): Promise<Order> {
   return orders.insert({
     status: 'PENDING_VERIFICATION',

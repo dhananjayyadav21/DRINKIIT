@@ -16,6 +16,8 @@ const required = [
   'RAZORPAY_KEY_ID',
   'RAZORPAY_KEY_SECRET',
   'RAZORPAY_WEBHOOK_SECRET',
+  'ADMIN_EMAIL',
+  'ADMIN_PASSWORD',
 ];
 
 const missing = required.filter((key) => !process.env[key]);
@@ -59,5 +61,10 @@ export const env = {
   business: {
     name: process.env.BUSINESS_NAME || 'DRINK IT',
     freeDeliveryRadiusKm: Number(process.env.FREE_DELIVERY_RADIUS_KM || 5),
+  },
+
+  admin: {
+    email: process.env.ADMIN_EMAIL as string,
+    password: process.env.ADMIN_PASSWORD as string,
   },
 };
