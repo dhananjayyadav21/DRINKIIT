@@ -149,6 +149,13 @@ export function sendCodConfirmation(to: string, order: Order): Promise<void> {
   );
 }
 
+export function sendPaymentLinkError(to: string): Promise<void> {
+  return sendText(
+    to,
+    "⚠️ We couldn't generate your payment link right now. Please reply *PAY* to try again, or *COD* to pay on delivery instead."
+  );
+}
+
 export function sendPaymentLink(to: string, order: Order, link: string): Promise<void> {
   return sendText(
     to,

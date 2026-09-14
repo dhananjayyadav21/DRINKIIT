@@ -35,15 +35,49 @@ export class JsonCollection<T extends BaseRecord> {
     this.writeQueue = Promise.resolve();
   }
 
+  // Guards against a corrupt/partially-written file taking down the whole
+  // app - this runs at module-load time (`new JsonCollection(...)` at the
+  // top of orderRepository.ts etc.), so an unhandled throw here would fail
+  // every route that imports it, not just one request.
   private load(): T[] {
     if (!fs.existsSync(this.filePath)) return [];
-    const raw = fs.readFileSync(this.filePath, 'utf8').trim();
-    return raw ? JSON.parse(raw) : [];
+
+    let raw: string;
+    try {
+      raw = fs.readFileSync(this.filePath, 'utf8').trim();
+    } catch (err) {
+      console.error(`Failed to read ${this.filePath}, starting with an empty collection:`, err);
+      return [];
+    }
+
+    if (!raw) return [];
+
+    try {
+      return JSON.parse(raw);
+    } catch (err) {
+      console.error(`Corrupt JSON in ${this.filePath}, starting with an empty collection:`, err);
+      try {
+        fs.renameSync(this.filePath, `${this.filePath}.corrupt-${Date.now()}`);
+      } catch {
+        // best-effort backup only - fall through either way
+      }
+      return [];
+    }
   }
 
+  // Errors are caught here (rather than left to reject `writeQueue`) so a
+  // single failed write (disk full, permissions, etc.) doesn't permanently
+  // poison the chain - every write after it would otherwise also reject,
+  // silently killing persistence for the rest of the process's lifetime.
   private persist(): Promise<void> {
     const snapshot = JSON.stringify(this.records, null, 2);
-    this.writeQueue = this.writeQueue.then(() => fs.promises.writeFile(this.filePath, snapshot));
+    this.writeQueue = this.writeQueue
+      .catch(() => {})
+      .then(() => fs.promises.writeFile(this.filePath, snapshot))
+      .catch((err) => {
+        console.error(`Failed to write ${this.filePath}:`, err);
+        throw err;
+      });
     return this.writeQueue;
   }
 

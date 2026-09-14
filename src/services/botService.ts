@@ -169,7 +169,14 @@ async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): P
     return;
   }
 
-  const link = await razorpayService.createPaymentLink(order, customer);
+  let link;
+  try {
+    link = await razorpayService.createPaymentLink(order, customer);
+  } catch (err) {
+    console.error(`Razorpay payment link creation failed for order ${order.id}:`, err);
+    await whatsapp.sendPaymentLinkError(customer.waId);
+    return;
+  }
 
   order.status = 'AWAITING_PAYMENT';
   order.paymentMethod = 'ONLINE';
