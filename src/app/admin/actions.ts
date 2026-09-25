@@ -29,7 +29,7 @@ export async function login(formData: FormData): Promise<void> {
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_COOKIE);
-  redirect('/admin/login');
+  redirect('/');
 }
 
 export async function markDelivered(orderId: string): Promise<void> {
