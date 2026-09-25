@@ -61,6 +61,14 @@ export function sendCatalog(to: string): Promise<void> {
   return sendText(to, templates.catalogMessage());
 }
 
+export function sendMenu(to: string): Promise<void> {
+  return sendText(to, templates.menuMessage());
+}
+
+export function sendAskQuantity(to: string, code: '1L' | '500ML'): Promise<void> {
+  return sendText(to, templates.askQuantityMessage(code));
+}
+
 export function sendHelp(to: string): Promise<void> {
   return sendText(to, templates.helpMessage());
 }

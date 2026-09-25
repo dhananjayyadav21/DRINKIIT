@@ -2,7 +2,7 @@ import { env } from '@/config/env';
 import { PRODUCTS, unitPrice } from '@/config/products';
 import { Order } from '@/types/order';
 
-const DIVIDER = '──────────────';
+const DIVIDER = '────────────────────────────';
 
 function formatMoney(amount: number): string {
   return Number(amount).toFixed(2).replace(/\.00$/, '');
@@ -13,7 +13,7 @@ function joinSections(...sections: string[]): string {
 }
 
 function heading(title: string): string {
-  return `*${title}*\n${DIVIDER}`;
+  return `*${title}*`;
 }
 
 function orderSummary(order: Order, note?: string): string {
@@ -53,13 +53,27 @@ function catalogEntry(code: '1L' | '500ML'): string {
 
 export function welcomeMessage(name?: string | null): string {
   const greetingName = name ? `, ${name}` : '';
+  return `👋 Welcome to *${env.business.name}*${greetingName}!\nWe deliver clean drinking water bottles straight to your door.`;
+}
+
+export function menuMessage(): string {
   return joinSections(
-    heading(`Welcome to ${env.business.name}! 👋`),
-    `Hi${greetingName}! We deliver clean drinking water bottles straight to your door.`,
-    joinSections(
-      '📋 *How to order:*',
-      '• Type *CATALOG* to see our prices \n\n • Send *ORDER 1L 12* or *ORDER 500ML 24* to order directly'
-    )
+    heading('What would you like to do?'),
+    [
+      `1️⃣ Order ${PRODUCTS['1L'].label} bottles`,
+      `2️⃣ Order ${PRODUCTS['500ML'].label} bottles`,
+      '3️⃣ View price list',
+    ].join('\n'),
+    '_Just reply with a number (1, 2 or 3)._'
+  );
+}
+
+export function askQuantityMessage(code: '1L' | '500ML'): string {
+  const product = PRODUCTS[code];
+  return joinSections(
+    heading(`💧 ${product.label} Bottles`),
+    `₹${product.boxPrice} per box (${product.piecesPerBox} pcs) — ₹${formatMoney(unitPrice(code))} per bottle`,
+    'How many bottles would you like? Reply with a number, e.g. *12*'
   );
 }
 
@@ -69,20 +83,14 @@ export function catalogMessage(): string {
     catalogEntry('1L'),
     catalogEntry('500ML'),
     freeDeliveryLine(),
-    joinSections(
-      '📝 *To order, send:*',
-      '*ORDER 1L <quantity>*\n*ORDER 500ML <quantity>*\n\n_Example: ORDER 1L 12_'
-    )
+    '_Reply with 1 or 2 to order._'
   );
 }
 
 export function helpMessage(): string {
   return joinSections(
     "🤔 Sorry, I didn't understand that.",
-    joinSections(
-      '📋 *You can:*',
-      '• Type *CATALOG* to see our prices\n\n• Send *ORDER 1L 12* or *ORDER 500ML 24* to order'
-    )
+    ['1️⃣ Order 1L', '2️⃣ Order 500ml', '3️⃣ View prices'].join('\n')
   );
 }
 
@@ -90,7 +98,6 @@ export function otpMessage(otp: string, order: Order): string {
   return joinSections(
     heading('Order Summary'),
     orderSummary(order),
-    heading('Verification Required'),
     `🔐 Your verification code is: *${otp}*\n⏱️ Valid for 5 minutes.`,
     'Reply with the 6-digit code to confirm your order, or type *RESEND* if it expires.'
   );
@@ -113,7 +120,7 @@ export function otpIncorrectMessage(): string {
 export function noPendingOrderMessage(): string {
   return joinSections(
     "You don't have a pending order right now.",
-    'Type *CATALOG* to see our prices.'
+    'Say *Hi* to see the menu and start a new order.'
   );
 }
 
@@ -123,7 +130,8 @@ export function paymentChoiceMessage(order: Order): string {
     orderSummary(order),
     joinSections(
       '💳 *How would you like to pay?*',
-      'Reply *COD* for Cash on Delivery, or *PAY* to pay online.'
+      '1️⃣ Cash on Delivery\n2️⃣ Pay Online',
+      '_Reply with 1 or 2._'
     )
   );
 }
@@ -142,7 +150,7 @@ export function paymentLinkErrorMessage(): string {
   return joinSections(
     heading('Payment Link Failed ⚠️'),
     "We couldn't generate your payment link right now.",
-    'Please reply *PAY* to try again, or *COD* to pay on delivery instead.'
+    'Reply *1* for Cash on Delivery, or *2* to try the payment link again.'
   );
 }
 

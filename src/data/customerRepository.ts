@@ -17,6 +17,7 @@ export function create({ waId, name }: { waId: string; name?: string | null }): 
     name: name || null,
     state: 'NEW',
     currentOrder: null,
+    pendingProduct: null,
   });
 }
 

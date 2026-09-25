@@ -1,14 +1,17 @@
 import * as customerRepo from '@/data/customerRepository';
 import * as orderRepo from '@/data/orderRepository';
-import { PRODUCTS, ProductCode, calculateAmount } from '@/config/products';
+import { ProductCode, calculateAmount } from '@/config/products';
 import * as otpService from './otpService';
 import * as whatsapp from './whatsappService';
 import * as razorpayService from './razorpayService';
 import { Customer } from '@/types/customer';
 
-const ORDER_COMMAND_RE = /^ORDER\s+(1L|500ML)\s+(\d+)$/;
+const GREETING_RE = /^h+[iey]{1,4}$|^hello+$|^menu$|^start$/i;
 const OTP_RE = /^\d{6}$/;
 const MAX_QUANTITY = 10000;
+
+const MENU_PRODUCT: Record<'1' | '2', ProductCode> = { '1': '1L', '2': '500ML' };
+const PAYMENT_CHOICE: Record<'1' | '2', 'COD' | 'PAY'> = { '1': 'COD', '2': 'PAY' };
 
 export interface IncomingMessage {
   waId: string;
@@ -24,20 +27,17 @@ async function findOrCreateCustomer(waId: string, name?: string | null): Promise
 
 export async function handleIncomingMessage({ waId, name, text }: IncomingMessage): Promise<void> {
   const customer = await findOrCreateCustomer(waId, name);
-
-  if (customer.state === 'NEW') {
-    await whatsapp.sendWelcome(waId, name);
-    await whatsapp.sendCatalog(waId);
-    customer.state = 'CATALOG_SENT';
-    await customerRepo.save(customer);
-    return;
-  }
-
   const raw = (text || '').trim();
   const upper = raw.toUpperCase();
 
-  if (customer.state === 'AWAITING_PAYMENT_CHOICE' && (upper === 'COD' || upper === 'PAY')) {
-    return handlePaymentChoice(customer, upper);
+  if (customer.state === 'NEW' || GREETING_RE.test(raw)) {
+    if (customer.state === 'NEW') {
+      await whatsapp.sendWelcome(waId, name);
+    }
+    await whatsapp.sendMenu(waId);
+    customer.state = 'CATALOG_SENT';
+    await customerRepo.save(customer);
+    return;
   }
 
   if (upper === 'CATALOG') {
@@ -49,20 +49,42 @@ export async function handleIncomingMessage({ waId, name, text }: IncomingMessag
     return handleResend(customer);
   }
 
-  const orderMatch = upper.match(ORDER_COMMAND_RE);
-  if (orderMatch) {
-    return handleNewOrder(customer, orderMatch[1] as ProductCode, parseInt(orderMatch[2], 10));
+  if (customer.state === 'CATALOG_SENT' && (raw === '1' || raw === '2')) {
+    return handleProductChoice(customer, raw as '1' | '2');
   }
 
-  if (OTP_RE.test(raw)) {
+  if (customer.state === 'CATALOG_SENT' && raw === '3') {
+    await whatsapp.sendCatalog(waId);
+    return;
+  }
+
+  if (customer.state === 'AWAITING_QUANTITY' && /^\d+$/.test(raw)) {
+    return handleQuantity(customer, parseInt(raw, 10));
+  }
+
+  if (customer.state === 'AWAITING_VERIFICATION' && OTP_RE.test(raw)) {
     return handleOtpVerification(customer, raw);
+  }
+
+  if (customer.state === 'AWAITING_PAYMENT_CHOICE' && (raw === '1' || raw === '2')) {
+    return handlePaymentChoice(customer, PAYMENT_CHOICE[raw as '1' | '2']);
   }
 
   await whatsapp.sendHelp(waId);
 }
 
-async function handleNewOrder(customer: Customer, productCode: ProductCode, quantity: number): Promise<void> {
-  if (!PRODUCTS[productCode] || quantity < 1 || quantity > MAX_QUANTITY) {
+async function handleProductChoice(customer: Customer, choice: '1' | '2'): Promise<void> {
+  customer.pendingProduct = MENU_PRODUCT[choice];
+  customer.state = 'AWAITING_QUANTITY';
+  await customerRepo.save(customer);
+
+  await whatsapp.sendAskQuantity(customer.waId, customer.pendingProduct);
+}
+
+async function handleQuantity(customer: Customer, quantity: number): Promise<void> {
+  const productCode = customer.pendingProduct;
+
+  if (!productCode || quantity < 1 || quantity > MAX_QUANTITY) {
     await whatsapp.sendHelp(customer.waId);
     return;
   }
@@ -81,6 +103,7 @@ async function handleNewOrder(customer: Customer, productCode: ProductCode, quan
   });
 
   customer.currentOrder = order.id;
+  customer.pendingProduct = null;
   customer.state = 'AWAITING_VERIFICATION';
   await customerRepo.save(customer);
 
