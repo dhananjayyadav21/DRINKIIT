@@ -1,5 +1,6 @@
 import { login } from '../actions';
 import PasswordField from './PasswordField';
+import SubmitButton from './SubmitButton';
 import styles from './login.module.css';
 
 export default async function LoginPage({
@@ -33,9 +34,7 @@ export default async function LoginPage({
             <PasswordField />
           </div>
 
-          <button type="submit" className={styles.submit}>
-            Log in
-          </button>
+          <SubmitButton />
         </form>
       </div>
     </main>
