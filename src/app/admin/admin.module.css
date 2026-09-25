@@ -1,7 +1,8 @@
 .page {
-  background: radial-gradient(circle at 15% 0%, #1b1330 0%, #0a0b10 40%, #0a0b10 100%);
+  min-height: 100vh;
+  background: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: #f2f3f5;
+  color: #12233e;
 }
 
 .container {
@@ -35,13 +36,13 @@
   width: 40px;
   height: 40px;
   border-radius: 11px;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
+  background: #0f6e94;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 19px;
   flex-shrink: 0;
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 6px 16px rgba(15, 110, 148, 0.3);
 }
 
 .title {
@@ -49,21 +50,21 @@
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.01em;
-  color: #f5f5f7;
+  color: #12233e;
 }
 
 .subtitle {
   font-size: 13px;
-  color: #8b8fa3;
+  color: #6b7686;
   margin: 2px 0 0;
 }
 
 .logoutButton {
   padding: 9px 16px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
-  color: #d1d3de;
+  border: 1px solid #d7dee6;
+  background: #ffffff;
+  color: #2c3a4e;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -71,8 +72,8 @@
 }
 
 .logoutButton:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: #f6f8fa;
+  border-color: #b9c4d0;
 }
 
 .statsGrid {
@@ -83,12 +84,13 @@
 }
 
 .statCard {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid #e5e9ee;
   border-radius: 14px;
   padding: 18px 20px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 10px rgba(18, 35, 62, 0.04);
 }
 
 .statCard::before {
@@ -98,14 +100,14 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #6366f1, #a855f7);
+  background: #0f6e94;
   opacity: 0.7;
 }
 
 .statLabel {
   font-size: 11.5px;
   font-weight: 700;
-  color: #8b8fa3;
+  color: #6b7686;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin: 0 0 8px;
@@ -116,20 +118,21 @@
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.02em;
-  color: #f5f5f7;
+  color: #12233e;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid #e5e9ee;
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 2px 10px rgba(18, 35, 62, 0.04);
 }
 
 .emptyState {
   padding: 64px 24px;
   text-align: center;
-  color: #8b8fa3;
+  color: #6b7686;
   font-size: 14px;
 }
 
@@ -147,18 +150,18 @@
 .table thead th {
   text-align: left;
   padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.02);
-  color: #767a8f;
+  background: #f6f8fa;
+  color: #6b7686;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid #e5e9ee;
   white-space: nowrap;
 }
 
 .table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid #eef1f4;
   transition: background 0.12s;
 }
 
@@ -167,7 +170,7 @@
 }
 
 .table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.025);
+  background: #f9fbfc;
 }
 
 .table td {
@@ -189,34 +192,34 @@
 }
 
 .orderId {
-  color: #b8bccb;
+  color: #4c5a6e;
   cursor: default;
 }
 
 .customerName {
   font-weight: 600;
-  color: #f2f3f5;
+  color: #12233e;
 }
 
 .customerPhone {
-  color: #6b6f82;
+  color: #97a1ae;
   font-size: 12px;
   margin-top: 2px;
 }
 
 .amount {
   font-weight: 700;
-  color: #f5f5f7;
+  color: #12233e;
 }
 
 .paymentRef {
   display: block;
-  color: #6b6f82;
+  color: #97a1ae;
   margin-top: 4px;
 }
 
 .placedAt {
-  color: #6b6f82;
+  color: #97a1ae;
   font-size: 12px;
 }
 
@@ -239,33 +242,34 @@
   background: currentColor;
 }
 
-.badgeGray { background: rgba(255, 255, 255, 0.08); color: #a8acc0; }
-.badgeBlue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-.badgeOrange { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-.badgeGreen { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-.badgePurple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
-.badgeRed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.badgeGray { background: #eef1f4; color: #5b6675; }
+.badgeBlue { background: #e6f2fa; color: #1c6dab; }
+.badgeOrange { background: #fdf1e0; color: #b5730a; }
+.badgeGreen { background: #e7f7ee; color: #1c8a4c; }
+.badgePurple { background: #f1eafb; color: #7c4fd1; }
+.badgeRed { background: #fdeceb; color: #c0392b; }
 
 .actionButton {
   padding: 8px 15px;
   border-radius: 8px;
   border: none;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
+  background: #0f6e94;
   color: #fff;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
-  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(15, 110, 148, 0.25);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
 .actionButton:hover {
+  background: #0c5b7a;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 6px 16px rgba(15, 110, 148, 0.35);
 }
 
 .doneLabel {
-  color: #4a4d5c;
+  color: #b3bcc7;
   font-size: 12px;
 }

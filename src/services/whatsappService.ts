@@ -1,7 +1,7 @@
 import twilio from 'twilio';
 import { env } from '@/config/env';
-import { PRODUCTS, unitPrice } from '@/config/products';
 import { Order } from '@/types/order';
+import * as templates from './messageTemplates';
 
 const twilioClient =
   env.whatsapp.provider === 'twilio' ? twilio(env.whatsapp.twilio.accountSid, env.whatsapp.twilio.authToken) : null;
@@ -53,126 +53,50 @@ async function sendText(to: string, body: string): Promise<void> {
   }
 }
 
-function formatMoney(amount: number): string {
-  return Number(amount).toFixed(2).replace(/\.00$/, '');
-}
-
 export function sendWelcome(to: string, name?: string | null): Promise<void> {
-  const greetingName = name ? ` ${name}` : '';
-  return sendText(
-    to,
-    `👋 Welcome to *${env.business.name}*${greetingName}!\n` +
-      'We deliver clean drinking water bottles straight to your door.\n\n' +
-      'Type *CATALOG* anytime to see our prices, or place an order directly, e.g.\n' +
-      '*ORDER 1L 12*\n*ORDER 500ML 24*'
-  );
+  return sendText(to, templates.welcomeMessage(name));
 }
 
 export function sendCatalog(to: string): Promise<void> {
-  const oneLiter = PRODUCTS['1L'];
-  const fiveHundred = PRODUCTS['500ML'];
-
-  return sendText(
-    to,
-    `*${env.business.name} – Price List* 💧\n\n` +
-      `🔹 ${oneLiter.label} Bottles\n` +
-      `₹${oneLiter.boxPrice} per box (${oneLiter.piecesPerBox} pcs) — ₹${formatMoney(
-        unitPrice('1L')
-      )} per bottle\n\n` +
-      `🔹 ${fiveHundred.label} Bottles\n` +
-      `₹${fiveHundred.boxPrice} per box (${fiveHundred.piecesPerBox} pcs) — ₹${formatMoney(
-        unitPrice('500ML')
-      )} per bottle\n\n` +
-      `🚚 Free delivery within ${env.business.freeDeliveryRadiusKm}km\n\n` +
-      'To order, send:\n*ORDER 1L <quantity>*\nor\n*ORDER 500ML <quantity>*\n\n' +
-      'Example: ORDER 1L 12'
-  );
+  return sendText(to, templates.catalogMessage());
 }
 
 export function sendHelp(to: string): Promise<void> {
-  return sendText(
-    to,
-    "Sorry, I didn't understand that. 🤔\n\n" +
-      'Type *CATALOG* to see our prices, or place an order like:\n' +
-      '*ORDER 1L 12*\n*ORDER 500ML 24*'
-  );
-}
-
-function orderLine(order: Order): string {
-  const product = PRODUCTS[order.product];
-  return `💧 ${product.label} x ${order.quantity}\n💰 Amount: ₹${formatMoney(order.amount)}`;
+  return sendText(to, templates.helpMessage());
 }
 
 export function sendOtp(to: string, otp: string, order: Order): Promise<void> {
-  return sendText(
-    to,
-    'Your order summary:\n' +
-      `${orderLine(order)}\n\n` +
-      `Your verification code is: *${otp}*\n` +
-      'It is valid for 5 minutes.\n\n' +
-      'Reply with the 6-digit code to confirm your order, or type RESEND if it expires.'
-  );
+  return sendText(to, templates.otpMessage(otp, order));
 }
 
 export function sendOtpExpired(to: string): Promise<void> {
-  return sendText(to, '⏰ Your verification code has expired. Reply *RESEND* to get a new one.');
+  return sendText(to, templates.otpExpiredMessage());
 }
 
 export function sendOtpIncorrect(to: string): Promise<void> {
-  return sendText(
-    to,
-    "❌ That code doesn't match. Please check and try again, or type *RESEND* for a new code."
-  );
+  return sendText(to, templates.otpIncorrectMessage());
 }
 
 export function sendNoPendingOrder(to: string): Promise<void> {
-  return sendText(to, "You don't have a pending order right now. Type *CATALOG* to see our prices.");
+  return sendText(to, templates.noPendingOrderMessage());
 }
 
 export function sendPaymentChoice(to: string, order: Order): Promise<void> {
-  return sendText(
-    to,
-    `✅ Order verified!\n${orderLine(order)}\n\n` +
-      'How would you like to pay?\n' +
-      'Reply *COD* for Cash on Delivery, or *PAY* to pay online.'
-  );
+  return sendText(to, templates.paymentChoiceMessage(order));
 }
 
 export function sendCodConfirmation(to: string, order: Order): Promise<void> {
-  return sendText(
-    to,
-    '🎉 Order Confirmed!\n\n' +
-      `Order ID: ${order.id}\n` +
-      `${orderLine(order)} (Pay on delivery)\n\n` +
-      `🚚 Free delivery within ${env.business.freeDeliveryRadiusKm}km. Our team will contact you shortly.\n\n` +
-      `Thank you for choosing ${env.business.name}! 💧`
-  );
+  return sendText(to, templates.codConfirmationMessage(order));
 }
 
 export function sendPaymentLinkError(to: string): Promise<void> {
-  return sendText(
-    to,
-    "⚠️ We couldn't generate your payment link right now. Please reply *PAY* to try again, or *COD* to pay on delivery instead."
-  );
+  return sendText(to, templates.paymentLinkErrorMessage());
 }
 
 export function sendPaymentLink(to: string, order: Order, link: string): Promise<void> {
-  return sendText(
-    to,
-    '💳 Please complete your payment using the secure link below:\n' +
-      `${link}\n\n` +
-      `Order ID: ${order.id}\n` +
-      `Amount: ₹${formatMoney(order.amount)}\n\n` +
-      'This link is valid for 24 hours.'
-  );
+  return sendText(to, templates.paymentLinkMessage(order, link));
 }
 
 export function sendPaidConfirmation(to: string, order: Order): Promise<void> {
-  return sendText(
-    to,
-    '✅ Payment received! Your order is confirmed.\n\n' +
-      `Order ID: ${order.id}\n` +
-      `${orderLine(order)}\n\n` +
-      `🚚 Free delivery within ${env.business.freeDeliveryRadiusKm}km. Thank you for choosing ${env.business.name}! 💧`
-  );
+  return sendText(to, templates.paidConfirmationMessage(order));
 }

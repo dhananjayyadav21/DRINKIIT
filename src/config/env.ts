@@ -61,6 +61,11 @@ export const env = {
   business: {
     name: process.env.BUSINESS_NAME || 'DRINK IT',
     freeDeliveryRadiusKm: Number(process.env.FREE_DELIVERY_RADIUS_KM || 5),
+    // Customer-facing number for the "Chat on WhatsApp" links on the website, e.g. 919082814100
+    whatsappNumber: process.env.BUSINESS_WHATSAPP_NUMBER || '',
+    contactPhone: process.env.BUSINESS_CONTACT_PHONE || '',
+    contactEmail: process.env.BUSINESS_CONTACT_EMAIL || '',
+    address: process.env.BUSINESS_ADDRESS || '',
   },
 
   admin: {
