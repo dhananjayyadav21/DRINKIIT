@@ -1,13 +1,13 @@
-import { JsonCollection } from './jsonStore';
+import { MongoCollection } from './mongoCollection';
 import { Order } from '@/types/order';
 
-const orders = new JsonCollection<Order>('orders.json');
+const orders = new MongoCollection<Order>('orders');
 
-export function findById(id: string): Order | null {
+export function findById(id: string): Promise<Order | null> {
   return orders.findById(id);
 }
 
-export function findAll(): Order[] {
+export function findAll(): Promise<Order[]> {
   return orders.findAll();
 }
 

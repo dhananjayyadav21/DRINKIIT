@@ -18,6 +18,7 @@ const required = [
   'RAZORPAY_WEBHOOK_SECRET',
   'ADMIN_EMAIL',
   'ADMIN_PASSWORD',
+  'MONGODB_URI',
 ];
 
 const missing = required.filter((key) => !process.env[key]);
@@ -56,6 +57,11 @@ export const env = {
     keyId: process.env.RAZORPAY_KEY_ID as string,
     keySecret: process.env.RAZORPAY_KEY_SECRET as string,
     webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET as string,
+  },
+
+  mongodb: {
+    uri: process.env.MONGODB_URI as string,
+    dbName: process.env.MONGODB_DB_NAME || 'drinkit',
   },
 
   business: {

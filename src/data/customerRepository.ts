@@ -1,13 +1,13 @@
-import { JsonCollection } from './jsonStore';
+import { MongoCollection } from './mongoCollection';
 import { Customer } from '@/types/customer';
 
-const customers = new JsonCollection<Customer>('customers.json');
+const customers = new MongoCollection<Customer>('customers');
 
-export function findByWaId(waId: string): Customer | null {
-  return customers.findOne((c) => c.waId === waId);
+export function findByWaId(waId: string): Promise<Customer | null> {
+  return customers.findOne({ waId });
 }
 
-export function findById(id: string): Customer | null {
+export function findById(id: string): Promise<Customer | null> {
   return customers.findById(id);
 }
 

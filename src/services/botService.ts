@@ -20,12 +20,37 @@ export interface IncomingMessage {
 }
 
 async function findOrCreateCustomer(waId: string, name?: string | null): Promise<Customer> {
-  const existing = customerRepo.findByWaId(waId);
+  const existing = await customerRepo.findByWaId(waId);
   if (existing) return existing;
   return customerRepo.create({ waId, name });
 }
 
-export async function handleIncomingMessage({ waId, name, text }: IncomingMessage): Promise<void> {
+// Messages from the SAME waId arriving close together (WhatsApp retries, a
+// double-tap, etc.) are chained per-waId so they're always processed one at
+// a time against a fresh read of that customer's state - otherwise two
+// concurrent handlers could both read the old state and one update would
+// clobber the other. Different waIds run fully in parallel via separate
+// queue entries. This only covers requests landing on the same warm
+// serverless instance, but that's the common case for near-simultaneous
+// webhook deliveries and costs nothing for the normal one-message-at-a-time
+// case.
+const perUserQueues = new Map<string, Promise<void>>();
+
+export function handleIncomingMessage(message: IncomingMessage): Promise<void> {
+  const previous = perUserQueues.get(message.waId) || Promise.resolve();
+  const next = previous
+    .catch(() => {})
+    .then(() => processIncomingMessage(message))
+    .finally(() => {
+      if (perUserQueues.get(message.waId) === next) {
+        perUserQueues.delete(message.waId);
+      }
+    });
+  perUserQueues.set(message.waId, next);
+  return next;
+}
+
+async function processIncomingMessage({ waId, name, text }: IncomingMessage): Promise<void> {
   const customer = await findOrCreateCustomer(waId, name);
   const raw = (text || '').trim();
   const upper = raw.toUpperCase();
@@ -116,7 +141,7 @@ async function handleResend(customer: Customer): Promise<void> {
     return;
   }
 
-  const order = orderRepo.findById(customer.currentOrder);
+  const order = await orderRepo.findById(customer.currentOrder);
   if (!order || order.status !== 'PENDING_VERIFICATION') {
     await whatsapp.sendNoPendingOrder(customer.waId);
     return;
@@ -139,7 +164,7 @@ async function handleOtpVerification(customer: Customer, code: string): Promise<
     return;
   }
 
-  const order = orderRepo.findById(customer.currentOrder);
+  const order = await orderRepo.findById(customer.currentOrder);
   if (!order || order.status !== 'PENDING_VERIFICATION') {
     await whatsapp.sendNoPendingOrder(customer.waId);
     return;
@@ -172,7 +197,7 @@ async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): P
     return;
   }
 
-  const order = orderRepo.findById(customer.currentOrder);
+  const order = await orderRepo.findById(customer.currentOrder);
   if (!order || order.status !== 'VERIFIED') {
     await whatsapp.sendNoPendingOrder(customer.waId);
     return;
@@ -213,7 +238,7 @@ async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): P
 }
 
 export async function markOrderPaid(orderId: string, paymentId?: string | null): Promise<void> {
-  const order = orderRepo.findById(orderId);
+  const order = await orderRepo.findById(orderId);
   if (!order || order.paid) return;
 
   order.status = 'CONFIRMED';
@@ -221,7 +246,7 @@ export async function markOrderPaid(orderId: string, paymentId?: string | null):
   order.razorpay.paymentId = paymentId || null;
   await orderRepo.save(order);
 
-  const customer = customerRepo.findById(order.customer);
+  const customer = await customerRepo.findById(order.customer);
   if (customer) {
     customer.state = 'CATALOG_SENT';
     customer.currentOrder = null;

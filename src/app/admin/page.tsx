@@ -75,7 +75,8 @@ export default async function AdminPage() {
     redirect('/admin/login');
   }
 
-  const orders = orderRepo.findAll().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const allOrders = await orderRepo.findAll();
+  const orders = allOrders.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   const stats = {
     total: orders.length,

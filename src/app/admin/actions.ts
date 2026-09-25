@@ -33,7 +33,7 @@ export async function logout(): Promise<void> {
 }
 
 export async function markDelivered(orderId: string): Promise<void> {
-  const order = orderRepo.findById(orderId);
+  const order = await orderRepo.findById(orderId);
   if (!order) return;
   order.status = 'DELIVERED';
   await orderRepo.save(order);

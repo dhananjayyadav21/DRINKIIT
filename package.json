@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "mongodb": "^7.6.0",
     "next": "^15.2.4",
     "razorpay": "^2.9.4",
     "react": "^19.0.0",
