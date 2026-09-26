@@ -33,7 +33,7 @@ function buildWhatsappLink(product: ProductPage): string {
   return `https://wa.me/${env.business.whatsappNumber}?text=${encodeURIComponent(text)}`;
 }
 
-const FEATURES = ['Sealed & tamper-proof', 'ISI certified', 'Free delivery on bulk orders'];
+const FEATURES = ['Sealed & tamper-proof', 'Free delivery on bulk orders'];
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
