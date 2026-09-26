@@ -6,7 +6,8 @@ import styles from './product.module.css';
 import SiteNav from '@/components/SiteNav';
 import SiteFooter from '@/components/SiteFooter';
 import { env } from '@/config/env';
-import { PRODUCT_PAGES, findProductPage, discountPercent, ProductPage } from '@/config/productPages';
+import { PRODUCTS, boxTierTable } from '@/config/products';
+import { PRODUCT_PAGES, findProductPage, ProductPage } from '@/config/productPages';
 
 export function generateStaticParams() {
   return PRODUCT_PAGES.map((p) => ({ slug: p.slug }));
@@ -21,9 +22,10 @@ export async function generateMetadata({
   const product = findProductPage(slug);
   if (!product) return {};
 
+  const box = PRODUCTS[product.productCode];
   return {
     title: `${product.brand} ${product.size} Packaged Water – ${env.business.name}`,
-    description: `Order ${product.brand} ${product.size} packaged drinking water bottles at ₹${product.sellPrice}, delivered via WhatsApp by ${env.business.name}.`,
+    description: `Order ${product.brand} ${product.size} packaged drinking water in bulk boxes, starting at ₹${box.boxPrice} per box (${box.piecesPerBox} pcs), delivered via WhatsApp by ${env.business.name}.`,
   };
 }
 
@@ -40,7 +42,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = findProductPage(slug);
   if (!product) notFound();
 
-  const discount = discountPercent(product);
+  const box = PRODUCTS[product.productCode];
+  const tiers = boxTierTable(product.productCode);
   const otherProducts = PRODUCT_PAGES.filter((p) => p.slug !== product.slug);
 
   return (
@@ -70,15 +73,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               {product.brand} {product.size} Packaged Water
             </h1>
             <p className={styles.subtitle}>
-              Purified, sealed {product.size} bottles — ordered on WhatsApp, delivered to your door.
+              Purified, sealed {product.size} bottles, supplied in bulk boxes of {box.piecesPerBox} —
+              ordered on WhatsApp, delivered to your door.
             </p>
 
             <div className={styles.priceRow}>
-              <span className={styles.sellPrice}>₹{product.sellPrice}</span>
-              <span className={styles.mrp}>₹{product.mrp}</span>
-              <span className={styles.discountBadge}>{discount}% off</span>
+              <span className={styles.sellPrice}>₹{box.boxPrice}</span>
+              <span className={styles.taxNote}>/ box ({box.piecesPerBox} pcs)</span>
             </div>
-            <p className={styles.taxNote}>Price per bottle, inclusive of all taxes</p>
 
             <ul className={styles.features}>
               {FEATURES.map((feature) => (
@@ -108,28 +110,57 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
+        <div className={styles.pricingTable}>
+          <h2 className={styles.pricingTitle}>Bulk Pricing</h2>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Boxes</th>
+                  <th>Pieces</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tiers.map((row) => (
+                  <tr key={row.boxes}>
+                    <td>
+                      {row.boxes} Box{row.boxes > 1 ? 'es' : ''}
+                    </td>
+                    <td>{row.pieces} pcs</td>
+                    <td>₹{row.price.toLocaleString('en-IN')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div className={styles.otherProducts}>
           <h2 className={styles.otherProductsTitle}>Other products</h2>
           <div className={styles.otherGrid}>
-            {otherProducts.map((p) => (
-              <Link href={`/${p.slug}`} className={styles.otherCard} key={p.slug}>
-                <div className={styles.otherImageWrap}>
-                  <Image
-                    src={p.image}
-                    alt={`${p.brand} ${p.size} packaged drinking water bottle`}
-                    fill
-                    className={styles.otherImage}
-                    sizes="(min-width: 640px) 33vw, 50vw"
-                  />
-                </div>
-                <div className={styles.otherCardBody}>
-                  <p className={styles.otherCardName}>
-                    {p.brand} {p.size}
-                  </p>
-                  <span className={styles.otherCardPrice}>₹{p.sellPrice}</span>
-                </div>
-              </Link>
-            ))}
+            {otherProducts.map((p) => {
+              const otherBox = PRODUCTS[p.productCode];
+              return (
+                <Link href={`/${p.slug}`} className={styles.otherCard} key={p.slug}>
+                  <div className={styles.otherImageWrap}>
+                    <Image
+                      src={p.image}
+                      alt={`${p.brand} ${p.size} packaged drinking water bottle`}
+                      fill
+                      className={styles.otherImage}
+                      sizes="(min-width: 640px) 33vw, 50vw"
+                    />
+                  </div>
+                  <div className={styles.otherCardBody}>
+                    <p className={styles.otherCardName}>
+                      {p.brand} {p.size}
+                    </p>
+                    <span className={styles.otherCardPrice}>₹{otherBox.boxPrice} / box</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

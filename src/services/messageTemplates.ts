@@ -1,5 +1,5 @@
 import { env } from '@/config/env';
-import { PRODUCTS, unitPrice } from '@/config/products';
+import { PRODUCTS, unitPrice, boxTierTable } from '@/config/products';
 import { Order } from '@/types/order';
 
 const DIVIDER = '────────────────────────────';
@@ -44,11 +44,11 @@ function footer(): string {
 
 function catalogEntry(code: '1L' | '500ML'): string {
   const product = PRODUCTS[code];
-  return [
-    `🔹 *${product.label} Bottles*`,
-    `   Box: ₹${product.boxPrice} (${product.piecesPerBox} pcs)`,
-    `   Per bottle: ₹${formatMoney(unitPrice(code))}`,
-  ].join('\n');
+  const tierLines = boxTierTable(code)
+    .map((row) => `   ${row.boxes} Box${row.boxes > 1 ? 'es' : ''} (${row.pieces} pcs) — ₹${formatMoney(row.price)}`)
+    .join('\n');
+
+  return [`🔹 *${product.label} Bottles* — ${product.piecesPerBox} pcs/box`, tierLines].join('\n');
 }
 
 export function welcomeMessage(name?: string | null): string {

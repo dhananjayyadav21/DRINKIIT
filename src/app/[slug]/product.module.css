@@ -89,8 +89,8 @@
 .priceRow {
   display: flex;
   align-items: baseline;
-  gap: 14px;
-  margin-bottom: 6px;
+  gap: 10px;
+  margin-bottom: 28px;
 }
 
 .sellPrice {
@@ -100,27 +100,10 @@
   color: #0f6e94;
 }
 
-.mrp {
-  font-size: 18px;
-  color: #97a1ae;
-  text-decoration: line-through;
-}
-
-.discountBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #e7f7ee;
-  color: #1c8a4c;
-  font-size: 12.5px;
-  font-weight: 700;
-}
-
 .taxNote {
-  font-size: 12.5px;
+  font-size: 14px;
   color: #97a1ae;
-  margin: 0 0 28px;
+  font-weight: 600;
 }
 
 .features {
@@ -197,8 +180,68 @@
   border-color: #b9c4d0;
 }
 
+.pricingTable {
+  margin-top: 56px;
+  padding-top: 40px;
+  border-top: 1px solid #ebeef2;
+}
+
+.pricingTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: #12233e;
+  margin: 0 0 20px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid #e5e9ee;
+  border-radius: 14px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead th {
+  text-align: left;
+  padding: 12px 18px;
+  background: #f7f9fb;
+  color: #6b7686;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid #e5e9ee;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #eef1f4;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #f9fbfc;
+}
+
+.table td {
+  padding: 12px 18px;
+  color: #2c3a4e;
+}
+
+.table td:last-child {
+  font-weight: 700;
+  color: #0f6e94;
+}
+
 .otherProducts {
-  margin-top: 64px;
+  margin-top: 56px;
   padding-top: 40px;
   border-top: 1px solid #ebeef2;
 }
