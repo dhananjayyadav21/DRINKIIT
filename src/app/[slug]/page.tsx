@@ -156,6 +156,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     <p className={styles.otherCardName}>
                       {p.brand} {p.size}
                     </p>
+                    <p className={styles.otherCardMeta}>{otherBox.piecesPerBox} pcs / box</p>
                     <span className={styles.otherCardPrice}>₹{otherBox.boxPrice} / box</span>
                   </div>
                 </Link>
