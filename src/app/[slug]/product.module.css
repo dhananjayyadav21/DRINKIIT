@@ -290,7 +290,8 @@
 }
 
 .otherImage {
-  object-fit: cover;
+  object-fit: contain;
+  padding: 10px;
 }
 
 .otherCardBody {
