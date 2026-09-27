@@ -30,14 +30,17 @@ const BRANDS = [
 
 const STEPS = [
   {
+    icon: '💬',
     title: 'Message us on WhatsApp',
-    text: 'Say hi or type CATALOG to see our current prices for 1L and 500ml bottles.',
+    text: 'Say Hi and pick 1L or 500ml from the menu — no app to install, no forms to fill.',
   },
   {
-    title: 'Place your order',
-    text: 'Send ORDER 1L 12 (or any quantity) — we confirm it with a quick OTP verification.',
+    icon: '🔢',
+    title: 'Choose quantity & verify',
+    text: 'Tell us how many bottles you need. We confirm your order with a quick OTP.',
   },
   {
+    icon: '🚚',
     title: 'Pay & relax',
     text: 'Choose Cash on Delivery or pay online. Our team delivers straight to your door.',
   },
@@ -79,7 +82,7 @@ export default function Home() {
             <div className={styles.heroImageFrame}>
               <Image
                 src="/images/detox-bottle-transparent.png"
-                alt="Packaged drinking water bottle delivered by DRINK iT"
+                alt="Packaged drinking water bottle delivered by DRINK IT"
                 fill
                 className={styles.heroImage}
                 priority
@@ -116,7 +119,7 @@ export default function Home() {
                 <div className={styles.productImageWrap}>
                   <Image
                     src={brand.image}
-                    alt={`${brand.name} packaged drinking water, available for delivery via DRINK iT`}
+                    alt={`${brand.name} packaged drinking water, available for delivery via DRINK IT`}
                     fill
                     className={styles.productImage}
                     sizes="(min-width: 640px) 50vw, 100vw"
@@ -140,19 +143,25 @@ export default function Home() {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionEyebrow}>How It Works</span>
-          <h2 className={styles.sectionTitle}>Ordering takes three steps</h2>
-        </div>
-        <div className={styles.stepsGrid}>
-          {STEPS.map((step, i) => (
-            <div className={styles.stepCard} key={step.title}>
-              <div className={styles.stepNumber}>{i + 1}</div>
-              <h3 className={styles.stepTitle}>{step.title}</h3>
-              <p className={styles.stepText}>{step.text}</p>
-            </div>
-          ))}
+      <section className={styles.howItWorksBand}>
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>How It Works</span>
+            <h2 className={styles.sectionTitle}>Ordering takes three steps</h2>
+            <p className={styles.sectionSubtitle}>From "Hi" to delivered — no app, no hassle.</p>
+          </div>
+          <div className={styles.stepsGrid}>
+            {STEPS.map((step, i) => (
+              <div className={styles.stepCard} key={step.title}>
+                <div className={styles.stepNumber}>
+                  <span className={styles.stepIcon}>{step.icon}</span>
+                  <span className={styles.stepIndex}>{i + 1}</span>
+                </div>
+                <h3 className={styles.stepTitle}>{step.title}</h3>
+                <p className={styles.stepText}>{step.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

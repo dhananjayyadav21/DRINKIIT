@@ -12,8 +12,8 @@ export default function SiteFooter() {
         <div className={styles.footerGrid}>
           <div className={styles.footerCol}>
             <div className={styles.footerBrand}>
-              <Image src="/images/logo.jpg" alt="DRINK iT" width={32} height={32} className={styles.brandLogo} />
-              Drink iT
+              <Image src="/images/logo.jpg" alt="DRINK IT" width={32} height={32} className={styles.brandLogo} />
+              DRINK IT
             </div>
             <p className={styles.footerTagline}>Drink well. Think well.</p>
             <div className={styles.footerLinks}>
@@ -41,7 +41,7 @@ export default function SiteFooter() {
           )}
         </div>
 
-        <p className={styles.footerCopy}>© {new Date().getFullYear()} DRINK iT. All rights reserved.</p>
+        <p className={styles.footerCopy}>© {new Date().getFullYear()} DRINK IT. All rights reserved.</p>
       </div>
     </footer>
   );

@@ -90,7 +90,7 @@ export default async function AdminPage() {
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.brand}>
-            <Image src="/images/logo.jpg" alt="DRINK iT" width={44} height={44} className={styles.logo} />
+            <Image src="/images/logo.jpg" alt="DRINK IT" width={44} height={44} className={styles.logo} />
             <div>
               <h1 className={styles.title}>Orders Dashboard</h1>
               <p className={styles.subtitle}>Track and complete customer orders</p>

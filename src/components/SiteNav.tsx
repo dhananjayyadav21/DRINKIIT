@@ -7,8 +7,8 @@ export default function SiteNav() {
     <header className={styles.nav}>
       <div className={styles.navInner}>
         <Link href="/" className={styles.brand}>
-          <Image src="/images/logo.jpg" alt="DRINK iT" width={36} height={36} className={styles.brandLogo} />
-          Drink iT
+          <Image src="/images/logo.jpg" alt="DRINK IT" width={36} height={36} className={styles.brandLogo} />
+          DRINK IT
         </Link>
         <nav className={styles.navLinks}>
           <Link href="/">Home</Link>

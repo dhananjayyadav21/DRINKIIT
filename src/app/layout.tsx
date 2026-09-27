@@ -16,9 +16,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'DRINK iT – Premium Water Bottle Delivery on WhatsApp',
+  title: 'DRINK IT – Premium Water Bottle Delivery on WhatsApp',
   description:
-    'DRINK iT supplies purified 1L and 500ml water bottles, ordered directly on WhatsApp and delivered to your door.',
+    'DRINK IT supplies purified 1L and 500ml water bottles, ordered directly on WhatsApp and delivered to your door.',
 };
 
 export const viewport: Viewport = {
