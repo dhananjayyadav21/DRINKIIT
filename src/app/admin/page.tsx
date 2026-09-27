@@ -30,6 +30,8 @@ function shortId(id: string): string {
 }
 
 function PaymentCell({ order }: { order: Order }) {
+  const razorpay = order.razorpay || { paymentLinkId: null, paymentLinkUrl: null, paymentId: null };
+
   if (order.paymentMethod === 'COD') {
     return <span className={`${styles.badge} ${styles.badgeGray}`}>COD</span>;
   }
@@ -42,9 +44,9 @@ function PaymentCell({ order }: { order: Order }) {
             <span className={styles.dot} />
             Paid online
           </span>
-          {order.razorpay.paymentId && (
-            <span className={`${styles.paymentRef} ${styles.mono}`} title={order.razorpay.paymentId}>
-              {order.razorpay.paymentId}
+          {razorpay.paymentId && (
+            <span className={`${styles.paymentRef} ${styles.mono}`} title={razorpay.paymentId}>
+              {razorpay.paymentId}
             </span>
           )}
         </div>
@@ -56,9 +58,9 @@ function PaymentCell({ order }: { order: Order }) {
           <span className={styles.dot} />
           Unpaid
         </span>
-        {order.razorpay.paymentLinkId && (
-          <span className={`${styles.paymentRef} ${styles.mono}`} title={order.razorpay.paymentLinkId}>
-            link: {order.razorpay.paymentLinkId}
+        {razorpay.paymentLinkId && (
+          <span className={`${styles.paymentRef} ${styles.mono}`} title={razorpay.paymentLinkId}>
+            link: {razorpay.paymentLinkId}
           </span>
         )}
       </div>
@@ -154,7 +156,7 @@ export default async function AdminPage() {
                         <div className={styles.customerPhone}>WhatsApp customer</div>
                       </td>
                       <td>
-                        {order.items.map((item, i) => (
+                        {(order.items || []).map((item, i) => (
                           <div key={i}>
                             {item.product} × {item.quantity}
                           </div>
