@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { ADMIN_COOKIE, issueSessionToken, verifyCredentials } from '@/lib/adminAuth';
 import * as orderRepo from '@/data/orderRepository';
+import * as whatsapp from '@/services/whatsappService';
 
 export async function login(formData: FormData): Promise<void> {
   const email = String(formData.get('email') || '').trim();
@@ -38,4 +39,5 @@ export async function markDelivered(orderId: string): Promise<void> {
   order.status = 'DELIVERED';
   await orderRepo.save(order);
   revalidatePath('/admin');
+  await whatsapp.sendOrderDelivered(order.waId, order);
 }

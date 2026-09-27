@@ -1,5 +1,5 @@
 import { env } from '@/config/env';
-import { PRODUCTS, unitPrice, boxTierTable } from '@/config/products';
+import { PRODUCTS, boxTierTable } from '@/config/products';
 import { Order } from '@/types/order';
 
 const DIVIDER = '────────────────────────────';
@@ -17,12 +17,17 @@ function heading(title: string): string {
 }
 
 function orderSummary(order: Order, note?: string): string {
-  const product = PRODUCTS[order.product];
+  const itemLines = order.items.map((item) => {
+    const product = PRODUCTS[item.product];
+    const pieces = item.quantity * product.piecesPerBox;
+    const boxLabel = `Box${item.quantity > 1 ? 'es' : ''}`;
+    return `💧 ${product.label} — ${item.quantity} ${boxLabel} (${pieces} pcs) — ₹${formatMoney(item.amount)}`;
+  });
+
   const lines = [
     `🆔 Order ID: *${order.id}*`,
-    `💧 Item: ${product.label} bottles`,
-    `📦 Quantity: ${order.quantity}`,
-    `💰 Amount: ₹${formatMoney(order.amount)}${note ? ` _(${note})_` : ''}`,
+    ...itemLines,
+    `💰 Total: ₹${formatMoney(order.amount)}${note ? ` _(${note})_` : ''}`,
   ];
   if (order.razorpay.paymentId) {
     lines.push(`🧾 Payment ID: *${order.razorpay.paymentId}*`);
@@ -56,83 +61,43 @@ export function welcomeMessage(name?: string | null): string {
   return `👋 Welcome to *${env.business.name}*${greetingName}!\nWe deliver clean drinking water bottles straight to your door.`;
 }
 
-export function menuMessage(): string {
-  return joinSections(
-    heading('What would you like to do?'),
-    [
-      `1️⃣ Order ${PRODUCTS['1L'].label} bottles`,
-      `2️⃣ Order ${PRODUCTS['500ML'].label} bottles`,
-      '3️⃣ View price list',
-    ].join('\n'),
-    '_Just reply with a number (1, 2 or 3)._'
-  );
-}
-
-export function askQuantityMessage(code: '1L' | '500ML'): string {
-  const product = PRODUCTS[code];
-  return joinSections(
-    heading(`💧 ${product.label} Bottles`),
-    `₹${product.boxPrice} per box (${product.piecesPerBox} pcs) — ₹${formatMoney(unitPrice(code))} per bottle`,
-    'How many bottles would you like? Reply with a number, e.g. *12*'
-  );
-}
-
 export function catalogMessage(): string {
   return joinSections(
     heading(`${env.business.name} – Price List 💧`),
     catalogEntry('1L'),
     catalogEntry('500ML'),
     freeDeliveryLine(),
-    '_Reply with 1 or 2 to order._'
+    '_Tap "View catalog" below to browse and order._'
   );
 }
 
 export function helpMessage(): string {
   return joinSections(
     "🤔 Sorry, I didn't understand that.",
-    ['1️⃣ Order 1L', '2️⃣ Order 500ml', '3️⃣ View prices'].join('\n')
+    'Say *Hi* to see our price list and browse the catalog.'
   );
 }
 
-export function otpMessage(otp: string, order: Order): string {
+export function cartUnresolvedMessage(): string {
   return joinSections(
-    heading('Order Summary'),
-    orderSummary(order),
-    `🔐 Your verification code is: *${otp}*\n⏱️ Valid for 5 minutes.`,
-    'Reply with the 6-digit code to confirm your order, or type *RESEND* if it expires.'
-  );
-}
-
-export function otpExpiredMessage(): string {
-  return joinSections(
-    heading('Code Expired ⏰'),
-    'Your verification code has expired. Reply *RESEND* to get a new one.'
-  );
-}
-
-export function otpIncorrectMessage(): string {
-  return joinSections(
-    heading('Incorrect Code ❌'),
-    "That code doesn't match. Please check and try again, or type *RESEND* for a new code."
+    heading("Couldn't Process Cart ⚠️"),
+    "We couldn't match the items in your cart to our product list.",
+    'Please try again, or message us directly to place your order.'
   );
 }
 
 export function noPendingOrderMessage(): string {
   return joinSections(
     "You don't have a pending order right now.",
-    'Say *Hi* to see the menu and start a new order.'
+    'Say *Hi* to see our price list and start a new order.'
   );
 }
 
 export function paymentChoiceMessage(order: Order): string {
   return joinSections(
-    heading('Order Verified ✅'),
+    heading('Order Summary'),
     orderSummary(order),
-    joinSections(
-      '💳 *How would you like to pay?*',
-      '1️⃣ Cash on Delivery\n2️⃣ Pay Online',
-      '_Reply with 1 or 2._'
-    )
+    '💳 *How would you like to pay?*'
   );
 }
 
@@ -140,7 +105,8 @@ export function codConfirmationMessage(order: Order): string {
   return joinSections(
     heading('Order Confirmed 🎉'),
     orderSummary(order, 'Pay on delivery'),
-    `${freeDeliveryLine()}\nOur team will contact you shortly.`,
+    `${freeDeliveryLine()}. Our team will contact you shortly.`,
+    '📍 *Please reply with your full delivery address* so we can get your order to you.',
     contactLine(),
     footer()
   );
@@ -150,16 +116,15 @@ export function paymentLinkErrorMessage(): string {
   return joinSections(
     heading('Payment Link Failed ⚠️'),
     "We couldn't generate your payment link right now.",
-    'Reply *1* for Cash on Delivery, or *2* to try the payment link again.'
+    'Please try again in a moment, or contact us and we’ll help you complete the order.'
   );
 }
 
-export function paymentLinkMessage(order: Order, link: string): string {
+export function paymentLinkMessage(order: Order): string {
   return joinSections(
     heading('Complete Your Payment 💳'),
     orderSummary(order),
-    `🔗 *Payment Link:*\n${link}`,
-    '_This link is valid for 24 hours._'
+    '_Tap the button below to pay securely. This link is valid for 24 hours._'
   );
 }
 
@@ -168,7 +133,34 @@ export function paidConfirmationMessage(order: Order): string {
     heading('Payment Received ✅'),
     orderSummary(order, 'Paid'),
     freeDeliveryLine(),
+    '📍 *Please reply with your full delivery address* so we can get your order to you.',
     contactLine(),
     footer()
+  );
+}
+
+export function orderInProgressMessage(order: Order): string {
+  return joinSections(
+    heading('Order In Progress 🚚'),
+    orderSummary(order),
+    'Your order has been placed and will be delivered soon.',
+    'Need help? Tap the button below to contact us.'
+  );
+}
+
+export function orderDeliveredMessage(order: Order): string {
+  return joinSections(
+    heading('Order Delivered ✅'),
+    orderSummary(order),
+    `Your order has been delivered. Thank you for choosing *${env.business.name}*! 🙏`,
+    'We hope to serve you again soon. 💧'
+  );
+}
+
+export function addressReceivedMessage(): string {
+  return joinSections(
+    heading('Address Confirmed 📍'),
+    "Thanks! We've noted your delivery address.",
+    'Your order is all set — we’ll reach out if we need anything else. Have a great day! 👋'
   );
 }

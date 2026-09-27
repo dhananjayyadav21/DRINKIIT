@@ -23,6 +23,24 @@ function extractMetaMessage(body: any): IncomingMessage | null {
     return { waId, name, text: message.text.body };
   }
 
+  // A tap on one of our reply buttons (e.g. payment choice) - Meta sends the
+  // button's `id` back, which we treat exactly like a typed command.
+  if (message.type === 'interactive' && message.interactive?.type === 'button_reply') {
+    return { waId, name, text: message.interactive.button_reply.id };
+  }
+
+  // A WhatsApp Commerce cart checkout - the customer picked items from the
+  // catalog and hit "Send". See https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#order-messages
+  if (message.type === 'order') {
+    const items = message.order?.product_items || [];
+    const cartItems = items.map((item: any) => ({
+      retailerId: item.product_retailer_id,
+      quantity: Number(item.quantity) || 0,
+      itemPrice: Number(item.item_price) || 0,
+    }));
+    return { waId, name, text: '', cartItems };
+  }
+
   return { waId, name, text: '' };
 }
 

@@ -11,13 +11,15 @@ const razorpay = new Razorpay({
 });
 
 export async function createPaymentLink(order: Order, customer: Customer) {
-  const product = PRODUCTS[order.product];
+  const description = order.items
+    .map((item) => `${PRODUCTS[item.product].label} x ${item.quantity}`)
+    .join(', ');
 
   const link = await razorpay.paymentLink.create({
     amount: Math.round(order.amount * 100), // paise
     currency: 'INR',
     accept_partial: false,
-    description: `${env.business.name} order - ${product.label} x ${order.quantity}`,
+    description: `${env.business.name} order - ${description}`,
     reference_id: order.id,
     customer: {
       contact: `+${customer.waId}`,

@@ -6,7 +6,8 @@ export type CustomerState =
   | 'AWAITING_QUANTITY'
   | 'AWAITING_VERIFICATION'
   | 'AWAITING_PAYMENT_CHOICE'
-  | 'AWAITING_PAYMENT';
+  | 'AWAITING_PAYMENT'
+  | 'AWAITING_ADDRESS';
 
 export interface Customer {
   id: string;

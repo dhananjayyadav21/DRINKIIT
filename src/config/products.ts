@@ -22,8 +22,10 @@ export function unitPrice(productCode: ProductCode): number {
   return product.boxPrice / product.piecesPerBox;
 }
 
+// `quantity` here is the number of BOXES (WhatsApp cart quantities are boxes,
+// not individual bottles - a customer orders "2" meaning 2 boxes of 12/24 pieces).
 export function calculateAmount(productCode: ProductCode, quantity: number): number {
-  const raw = unitPrice(productCode) * quantity;
+  const raw = PRODUCTS[productCode].boxPrice * quantity;
   return Math.round(raw * 100) / 100;
 }
 
@@ -42,4 +44,17 @@ export function boxTierTable(productCode: ProductCode): BoxTierRow[] {
     pieces: boxes * product.piecesPerBox,
     price: boxes * product.boxPrice,
   }));
+}
+
+// Combines quantities of the same product code into a single line (e.g. two
+// cart entries for '1L' become one item with the summed quantity), since a
+// WhatsApp cart can list the same catalog item more than once.
+export function mergeItemQuantities(
+  entries: Array<{ product: ProductCode; quantity: number }>
+): Array<{ product: ProductCode; quantity: number }> {
+  const totals = new Map<ProductCode, number>();
+  for (const { product, quantity } of entries) {
+    totals.set(product, (totals.get(product) || 0) + quantity);
+  }
+  return Array.from(totals.entries()).map(([product, quantity]) => ({ product, quantity }));
 }

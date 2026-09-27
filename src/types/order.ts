@@ -4,18 +4,24 @@ export type OrderStatus = 'PENDING_VERIFICATION' | 'VERIFIED' | 'AWAITING_PAYMEN
 
 export type PaymentMethod = 'COD' | 'ONLINE' | null;
 
+export interface OrderItem {
+  product: ProductCode;
+  quantity: number;
+  amount: number;
+}
+
 export interface Order {
   id: string;
   createdAt: string;
   updatedAt: string;
   customer: string;
   waId: string;
-  product: ProductCode;
-  quantity: number;
+  items: OrderItem[];
   amount: number;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   paid: boolean;
+  address: string | null;
   otp: string;
   otpExpiresAt: string;
   otpAttempts: number;

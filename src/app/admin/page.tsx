@@ -135,6 +135,7 @@ export default async function AdminPage() {
                     <th>Product</th>
                     <th>Amount</th>
                     <th>Payment</th>
+                    <th>Address</th>
                     <th>Status</th>
                     <th>Placed</th>
                     <th></th>
@@ -153,11 +154,18 @@ export default async function AdminPage() {
                         <div className={styles.customerPhone}>WhatsApp customer</div>
                       </td>
                       <td>
-                        {order.product} × {order.quantity}
+                        {order.items.map((item, i) => (
+                          <div key={i}>
+                            {item.product} × {item.quantity}
+                          </div>
+                        ))}
                       </td>
                       <td className={styles.amount}>₹{order.amount}</td>
                       <td>
                         <PaymentCell order={order} />
+                      </td>
+                      <td className={styles.addressCell} title={order.address || undefined}>
+                        {order.address || <span className={styles.doneLabel}>—</span>}
                       </td>
                       <td>
                         <span className={`${styles.badge} ${STATUS_BADGE[order.status]}`}>

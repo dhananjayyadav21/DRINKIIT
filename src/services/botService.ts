@@ -1,22 +1,25 @@
 import * as customerRepo from '@/data/customerRepository';
 import * as orderRepo from '@/data/orderRepository';
-import { ProductCode, calculateAmount } from '@/config/products';
-import * as otpService from './otpService';
+import { ProductCode, calculateAmount, mergeItemQuantities } from '@/config/products';
+import { resolveProductCode } from '@/config/catalogMapping';
 import * as whatsapp from './whatsappService';
 import * as razorpayService from './razorpayService';
 import { Customer } from '@/types/customer';
+import { OrderStatus } from '@/types/order';
 
 const GREETING_RE = /^h+[iey]{1,4}$|^hello+$|^menu$|^start$/i;
-const OTP_RE = /^\d{6}$/;
-const MAX_QUANTITY = 10000;
 
-const MENU_PRODUCT: Record<'1' | '2', ProductCode> = { '1': '1L', '2': '500ML' };
-const PAYMENT_CHOICE: Record<'1' | '2', 'COD' | 'PAY'> = { '1': 'COD', '2': 'PAY' };
+export interface CartItem {
+  retailerId: string;
+  quantity: number;
+  itemPrice: number;
+}
 
 export interface IncomingMessage {
   waId: string;
   name?: string | null;
   text?: string;
+  cartItems?: CartItem[];
 }
 
 async function findOrCreateCustomer(waId: string, name?: string | null): Promise<Customer> {
@@ -50,141 +53,109 @@ export function handleIncomingMessage(message: IncomingMessage): Promise<void> {
   return next;
 }
 
-async function processIncomingMessage({ waId, name, text }: IncomingMessage): Promise<void> {
+// Ordering only happens through the WhatsApp Commerce catalog: the customer
+// says "Hi", gets the price list with a "View catalog" button, builds a cart
+// there, and sends it. This handler's job is just: welcome new customers,
+// re-send the price list to returning ones, process a cart the moment it
+// arrives (regardless of what state the customer was in), and walk through
+// payment choice once an order exists.
+async function processIncomingMessage({ waId, name, text, cartItems }: IncomingMessage): Promise<void> {
   const customer = await findOrCreateCustomer(waId, name);
   const raw = (text || '').trim();
   const upper = raw.toUpperCase();
 
-  if (customer.state === 'NEW' || GREETING_RE.test(raw)) {
-    if (customer.state === 'NEW') {
-      await whatsapp.sendWelcome(waId, name);
-    }
-    await whatsapp.sendMenu(waId);
+  if (cartItems && cartItems.length > 0) {
+    return handleCartOrder(customer, cartItems);
+  }
+
+  if (customer.state === 'NEW') {
+    await whatsapp.sendWelcome(waId, name);
+    await whatsapp.sendCatalog(waId);
     customer.state = 'CATALOG_SENT';
     await customerRepo.save(customer);
     return;
   }
 
-  if (upper === 'CATALOG') {
-    await whatsapp.sendCatalog(waId);
+  if (
+    customer.state === 'AWAITING_PAYMENT_CHOICE' &&
+    (upper === whatsapp.PAYMENT_CHOICE_BUTTONS.cod.id || upper === whatsapp.PAYMENT_CHOICE_BUTTONS.online.id)
+  ) {
+    const choice = upper === whatsapp.PAYMENT_CHOICE_BUTTONS.cod.id ? 'COD' : 'PAY';
+    return handlePaymentChoice(customer, choice);
+  }
+
+  if (customer.state === 'AWAITING_ADDRESS' && raw.length > 0) {
+    return handleAddressReceived(customer, raw);
+  }
+
+  // A customer with an order still out for delivery gets a status update
+  // instead of the price list/help text - they're almost certainly asking
+  // "where's my order", not trying to browse or place a new one.
+  const pendingOrder = await findInProgressOrder(customer);
+  if (pendingOrder) {
+    await whatsapp.sendOrderInProgress(waId, pendingOrder);
     return;
   }
 
-  if (upper === 'RESEND') {
-    return handleResend(customer);
-  }
-
-  if (customer.state === 'CATALOG_SENT' && (raw === '1' || raw === '2')) {
-    return handleProductChoice(customer, raw as '1' | '2');
-  }
-
-  if (customer.state === 'CATALOG_SENT' && raw === '3') {
+  if (GREETING_RE.test(raw) || upper === 'CATALOG') {
     await whatsapp.sendCatalog(waId);
     return;
-  }
-
-  if (customer.state === 'AWAITING_QUANTITY' && /^\d+$/.test(raw)) {
-    return handleQuantity(customer, parseInt(raw, 10));
-  }
-
-  if (customer.state === 'AWAITING_VERIFICATION' && OTP_RE.test(raw)) {
-    return handleOtpVerification(customer, raw);
-  }
-
-  if (customer.state === 'AWAITING_PAYMENT_CHOICE' && (raw === '1' || raw === '2')) {
-    return handlePaymentChoice(customer, PAYMENT_CHOICE[raw as '1' | '2']);
   }
 
   await whatsapp.sendHelp(waId);
 }
 
-async function handleProductChoice(customer: Customer, choice: '1' | '2'): Promise<void> {
-  customer.pendingProduct = MENU_PRODUCT[choice];
-  customer.state = 'AWAITING_QUANTITY';
-  await customerRepo.save(customer);
+// An order counts as "in progress" once it's past checkout (COD confirmed or
+// paid online) but hasn't been marked delivered/cancelled yet - that's the
+// window where a customer messaging in is almost certainly asking "where's
+// my order", not trying to place a new one.
+const IN_PROGRESS_STATUSES: OrderStatus[] = ['CONFIRMED'];
 
-  await whatsapp.sendAskQuantity(customer.waId, customer.pendingProduct);
+async function findInProgressOrder(customer: Customer) {
+  if (!customer.currentOrder) return null;
+  const order = await orderRepo.findById(customer.currentOrder);
+  if (!order || !IN_PROGRESS_STATUSES.includes(order.status)) return null;
+  return order;
 }
 
-async function handleQuantity(customer: Customer, quantity: number): Promise<void> {
-  const productCode = customer.pendingProduct;
+async function handleCartOrder(customer: Customer, cartItems: CartItem[]): Promise<void> {
+  const merged = mergeItemQuantities(
+    cartItems
+      .map((item) => {
+        const product = resolveProductCode(item.retailerId, item.itemPrice);
+        return product ? { product, quantity: item.quantity } : null;
+      })
+      .filter((x): x is { product: ProductCode; quantity: number } => x !== null)
+  );
 
-  if (!productCode || quantity < 1 || quantity > MAX_QUANTITY) {
-    await whatsapp.sendHelp(customer.waId);
+  if (merged.length === 0) {
+    await whatsapp.sendCartUnresolved(customer.waId);
     return;
   }
 
-  const amount = calculateAmount(productCode, quantity);
-  const otp = otpService.generateOtp();
+  const items = merged.map(({ product, quantity }) => ({
+    product,
+    quantity,
+    amount: calculateAmount(product, quantity),
+  }));
+
+  await createOrderAndAskPayment(customer, items);
+}
+
+async function createOrderAndAskPayment(
+  customer: Customer,
+  items: Array<{ product: ProductCode; quantity: number; amount: number }>
+): Promise<void> {
+  const amount = items.reduce((sum, item) => sum + item.amount, 0);
 
   const order = await orderRepo.create({
     customer: customer.id,
     waId: customer.waId,
-    product: productCode,
-    quantity,
+    items,
     amount,
-    otp,
-    otpExpiresAt: otpService.newOtpExpiry(),
   });
 
   customer.currentOrder = order.id;
-  customer.pendingProduct = null;
-  customer.state = 'AWAITING_VERIFICATION';
-  await customerRepo.save(customer);
-
-  await whatsapp.sendOtp(customer.waId, otp, order);
-}
-
-async function handleResend(customer: Customer): Promise<void> {
-  if (!customer.currentOrder) {
-    await whatsapp.sendNoPendingOrder(customer.waId);
-    return;
-  }
-
-  const order = await orderRepo.findById(customer.currentOrder);
-  if (!order || order.status !== 'PENDING_VERIFICATION') {
-    await whatsapp.sendNoPendingOrder(customer.waId);
-    return;
-  }
-
-  order.otp = otpService.generateOtp();
-  order.otpExpiresAt = otpService.newOtpExpiry();
-  order.otpAttempts = 0;
-  await orderRepo.save(order);
-
-  customer.state = 'AWAITING_VERIFICATION';
-  await customerRepo.save(customer);
-
-  await whatsapp.sendOtp(customer.waId, order.otp, order);
-}
-
-async function handleOtpVerification(customer: Customer, code: string): Promise<void> {
-  if (!customer.currentOrder) {
-    await whatsapp.sendNoPendingOrder(customer.waId);
-    return;
-  }
-
-  const order = await orderRepo.findById(customer.currentOrder);
-  if (!order || order.status !== 'PENDING_VERIFICATION') {
-    await whatsapp.sendNoPendingOrder(customer.waId);
-    return;
-  }
-
-  if (otpService.isExpired(order.otpExpiresAt)) {
-    await whatsapp.sendOtpExpired(customer.waId);
-    return;
-  }
-
-  if (code !== order.otp) {
-    order.otpAttempts += 1;
-    await orderRepo.save(order);
-    await whatsapp.sendOtpIncorrect(customer.waId);
-    return;
-  }
-
-  order.status = 'VERIFIED';
-  await orderRepo.save(order);
-
   customer.state = 'AWAITING_PAYMENT_CHOICE';
   await customerRepo.save(customer);
 
@@ -209,8 +180,7 @@ async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): P
     order.paid = false;
     await orderRepo.save(order);
 
-    customer.state = 'CATALOG_SENT';
-    customer.currentOrder = null;
+    customer.state = 'AWAITING_ADDRESS';
     await customerRepo.save(customer);
 
     await whatsapp.sendCodConfirmation(customer.waId, order);
@@ -237,6 +207,27 @@ async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): P
   await whatsapp.sendPaymentLink(customer.waId, order, link.short_url as string);
 }
 
+async function handleAddressReceived(customer: Customer, address: string): Promise<void> {
+  if (!customer.currentOrder) {
+    await whatsapp.sendNoPendingOrder(customer.waId);
+    return;
+  }
+
+  const order = await orderRepo.findById(customer.currentOrder);
+  if (order) {
+    order.address = address;
+    await orderRepo.save(order);
+  }
+
+  // currentOrder is deliberately kept (not cleared) so a follow-up message
+  // from this customer while the order is still out for delivery is
+  // recognized as an "order in progress" check-in rather than a new order.
+  customer.state = 'CATALOG_SENT';
+  await customerRepo.save(customer);
+
+  await whatsapp.sendAddressReceived(customer.waId);
+}
+
 export async function markOrderPaid(orderId: string, paymentId?: string | null): Promise<void> {
   const order = await orderRepo.findById(orderId);
   if (!order || order.paid) return;
@@ -248,8 +239,7 @@ export async function markOrderPaid(orderId: string, paymentId?: string | null):
 
   const customer = await customerRepo.findById(order.customer);
   if (customer) {
-    customer.state = 'CATALOG_SENT';
-    customer.currentOrder = null;
+    customer.state = 'AWAITING_ADDRESS';
     await customerRepo.save(customer);
   }
 

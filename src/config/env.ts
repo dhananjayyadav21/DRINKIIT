@@ -38,6 +38,9 @@ export const env = {
       phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID as string,
       verifyToken: process.env.WHATSAPP_VERIFY_TOKEN as string,
       apiVersion: process.env.WHATSAPP_API_VERSION || 'v20.0',
+      // Catalog ID from Meta Commerce Manager, linked to this WhatsApp Business Account.
+      // Optional - when unset, the "View Catalog" option is hidden from the menu.
+      catalogId: process.env.WHATSAPP_CATALOG_ID || '',
     },
 
     twilio: {

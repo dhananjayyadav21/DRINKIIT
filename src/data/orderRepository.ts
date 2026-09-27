@@ -11,11 +11,14 @@ export function findAll(): Promise<Order[]> {
   return orders.findAll();
 }
 
-export function create(data: Partial<Order> & Pick<Order, 'customer' | 'waId' | 'product' | 'quantity' | 'amount' | 'otp' | 'otpExpiresAt'>): Promise<Order> {
+export function create(data: Partial<Order> & Pick<Order, 'customer' | 'waId' | 'items' | 'amount'>): Promise<Order> {
   return orders.insert({
-    status: 'PENDING_VERIFICATION',
+    status: 'VERIFIED',
     paymentMethod: null,
     paid: false,
+    address: null,
+    otp: '',
+    otpExpiresAt: '',
     otpAttempts: 0,
     razorpay: { paymentLinkId: null, paymentLinkUrl: null, paymentId: null },
     ...data,
