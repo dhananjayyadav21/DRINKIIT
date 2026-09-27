@@ -1,49 +1,35 @@
-import twilio from 'twilio';
 import { env } from '@/config/env';
 import { Order } from '@/types/order';
 import * as templates from './messageTemplates';
 
-const twilioClient =
-  env.whatsapp.provider === 'twilio' ? twilio(env.whatsapp.twilio.accountSid, env.whatsapp.twilio.authToken) : null;
-
-function toWhatsAppAddress(waId: string): string {
-  return waId.startsWith('whatsapp:') ? waId : `whatsapp:${waId}`;
-}
-
-async function sendViaMeta(to: string, body: string): Promise<void> {
+async function sendText(to: string, body: string): Promise<void> {
   const url = `https://graph.facebook.com/${env.whatsapp.meta.apiVersion}/${env.whatsapp.meta.phoneNumberId}/messages`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.whatsapp.meta.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      to,
-      type: 'text',
-      text: { body },
-    }),
-  });
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.whatsapp.meta.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'text',
+        text: { body },
+      }),
+    });
 
-  if (!res.ok) {
-    const errorBody = await res.text().catch(() => '');
-    throw new Error(`Meta API error (${res.status}): ${errorBody}`);
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      throw new Error(`Meta API error (${res.status}): ${errorBody}`);
+    }
+  } catch (err) {
+    console.error(`WhatsApp send error (to ${to}):`, err instanceof Error ? err.message : err);
   }
-}
-
-async function sendViaTwilio(to: string, body: string): Promise<void> {
-  await twilioClient!.messages.create({
-    from: env.whatsapp.twilio.fromNumber,
-    to: toWhatsAppAddress(to),
-    contentSid: env.whatsapp.twilio.contentSid,
-    contentVariables: JSON.stringify({ 1: body }),
-  });
 }
 
 // Sends Meta's interactive "catalog_message" - a message with a button that
 // opens the full WhatsApp Commerce catalog linked to this business account.
-// Twilio has no equivalent, so this is a no-op there.
 async function sendCatalogViaMeta(to: string, bodyText: string): Promise<void> {
   const url = `https://graph.facebook.com/${env.whatsapp.meta.apiVersion}/${env.whatsapp.meta.phoneNumberId}/messages`;
   const res = await fetch(url, {
@@ -70,33 +56,14 @@ async function sendCatalogViaMeta(to: string, bodyText: string): Promise<void> {
   }
 }
 
-async function sendText(to: string, body: string): Promise<void> {
-  try {
-    if (env.whatsapp.provider === 'meta') {
-      await sendViaMeta(to, body);
-    } else {
-      await sendViaTwilio(to, body);
-    }
-  } catch (err) {
-    console.error(`WhatsApp send error (to ${to}):`, err instanceof Error ? err.message : err);
-  }
-}
-
 // Meta's interactive reply-button message (max 3 buttons, id + title only -
 // a tap comes back through the webhook as a normal message whose text is the
-// button's id). Twilio has no equivalent, so it falls back to plain text
-// with the button titles listed for the customer to type instead.
+// button's id).
 async function sendButtons(
   to: string,
   bodyText: string,
   buttons: Array<{ id: string; title: string }>
 ): Promise<void> {
-  if (env.whatsapp.provider !== 'meta') {
-    const optionsList = buttons.map((b) => `• ${b.title}`).join('\n');
-    await sendText(to, `${bodyText}\n\n${optionsList}`);
-    return;
-  }
-
   const url = `https://graph.facebook.com/${env.whatsapp.meta.apiVersion}/${env.whatsapp.meta.phoneNumberId}/messages`;
   try {
     const res = await fetch(url, {
@@ -132,11 +99,6 @@ async function sendButtons(
 // directly (used for the payment link, so tapping it goes straight to
 // checkout instead of the customer having to copy/paste a URL).
 async function sendCtaUrl(to: string, bodyText: string, buttonText: string, url: string): Promise<void> {
-  if (env.whatsapp.provider !== 'meta') {
-    await sendText(to, `${bodyText}\n\n${url}`);
-    return;
-  }
-
   const apiUrl = `https://graph.facebook.com/${env.whatsapp.meta.apiVersion}/${env.whatsapp.meta.phoneNumberId}/messages`;
   try {
     const res = await fetch(apiUrl, {
@@ -174,12 +136,12 @@ export function sendWelcome(to: string, name?: string | null): Promise<void> {
   return sendText(to, templates.welcomeMessage(name));
 }
 
-export const catalogInteractiveEnabled = env.whatsapp.provider === 'meta' && !!env.whatsapp.meta.catalogId;
+export const catalogInteractiveEnabled = !!env.whatsapp.meta.catalogId;
 
 // Sends the price list as one message with a real "View catalog" button
 // attached (Meta's catalog_message), so the customer can tap straight into
 // the photo catalog and build a cart from there. Falls back to a plain-text
-// price list on Twilio, or if no catalog is configured.
+// price list if no catalog is configured.
 export async function sendCatalog(to: string): Promise<void> {
   const bodyText = templates.catalogMessage();
 

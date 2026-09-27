@@ -63,7 +63,7 @@ export default function PrivacyPolicyPage() {
           <h2 className={styles.sectionTitle}>Data sharing</h2>
           <p className={styles.sectionText}>
             We do not sell or rent your personal information. We only share order-related information
-            with trusted service providers (such as WhatsApp/Meta, Twilio and Razorpay) as necessary
+            with trusted service providers (such as WhatsApp/Meta and Razorpay) as necessary
             to process and deliver your order, or when required by law.
           </p>
         </div>

@@ -1,18 +1,7 @@
-const useMeta = process.env.WHATSAPP_META_CLOUD_API === 'true';
-const useTwilio = process.env.WHATSAPP_TWILIO === 'true';
-
-if (useMeta === useTwilio) {
-  throw new Error(
-    `Invalid WhatsApp provider configuration: WHATSAPP_META_CLOUD_API=${process.env.WHATSAPP_META_CLOUD_API} ` +
-      `and WHATSAPP_TWILIO=${process.env.WHATSAPP_TWILIO}.\n` +
-      'Set exactly ONE of them to "true" and the other to "false" in .env.local to choose a WhatsApp provider.'
-  );
-}
-
 const required = [
-  ...(useMeta
-    ? ['WHATSAPP_TOKEN', 'WHATSAPP_PHONE_NUMBER_ID', 'WHATSAPP_VERIFY_TOKEN']
-    : ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_WHATSAPP_NUMBER', 'TWILIO_CONTENT_SID']),
+  'WHATSAPP_TOKEN',
+  'WHATSAPP_PHONE_NUMBER_ID',
+  'WHATSAPP_VERIFY_TOKEN',
   'RAZORPAY_KEY_ID',
   'RAZORPAY_KEY_SECRET',
   'RAZORPAY_WEBHOOK_SECRET',
@@ -31,8 +20,6 @@ if (missing.length > 0) {
 
 export const env = {
   whatsapp: {
-    provider: (useMeta ? 'meta' : 'twilio') as 'meta' | 'twilio',
-
     meta: {
       token: process.env.WHATSAPP_TOKEN as string,
       phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID as string,
@@ -41,18 +28,6 @@ export const env = {
       // Catalog ID from Meta Commerce Manager, linked to this WhatsApp Business Account.
       // Optional - when unset, the "View Catalog" option is hidden from the menu.
       catalogId: process.env.WHATSAPP_CATALOG_ID || '',
-    },
-
-    twilio: {
-      accountSid: process.env.TWILIO_ACCOUNT_SID as string,
-      authToken: process.env.TWILIO_AUTH_TOKEN as string,
-      // e.g. 'whatsapp:+14155238886' (Sandbox) or 'whatsapp:+91XXXXXXXXXX' (production number)
-      fromNumber: process.env.TWILIO_WHATSAPP_NUMBER as string,
-      // ContentSid (starts with "HX...") of a single-variable text Content Template -
-      // Twilio requires all WhatsApp sends to reference a Content Template now.
-      contentSid: process.env.TWILIO_CONTENT_SID as string,
-      // Skip Twilio signature validation for local testing (ngrok URL mismatches, etc.)
-      validateSignature: process.env.TWILIO_VALIDATE_SIGNATURE !== 'false',
     },
   },
 
