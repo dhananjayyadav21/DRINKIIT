@@ -143,8 +143,10 @@ export function orderInProgressMessage(order: Order): string {
   return joinSections(
     heading('Order In Progress 🚚'),
     orderSummary(order),
-    'Your order has been placed and will be delivered soon.',
-    'Need help? Tap the button below to contact us.'
+    DIVIDER,
+    "Your order is packed and on its way — we're getting it delivered to you soon!",
+    '🙋 *Need help or have a question?* Tap the button below to contact us anytime.',
+    footer()
   );
 }
 
@@ -152,8 +154,9 @@ export function orderDeliveredMessage(order: Order): string {
   return joinSections(
     heading('Order Delivered ✅'),
     orderSummary(order),
-    `Your order has been delivered. Thank you for choosing *${env.business.name}*! 🙏`,
-    'We hope to serve you again soon. 💧'
+    DIVIDER,
+    '📦 Your order has been delivered. We hope you enjoy it!',
+    `Thank you for choosing *${env.business.name}* — we hope to serve you again soon! 💧🙏`
   );
 }
 
