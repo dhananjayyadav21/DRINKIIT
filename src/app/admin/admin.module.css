@@ -58,6 +58,9 @@
 }
 
 .logoutButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 9px 18px;
   border-radius: 8px;
   border: 1px solid #d7dee6;
@@ -72,6 +75,32 @@
 .logoutButton:hover {
   background: #f6f8fa;
   border-color: #b9c4d0;
+}
+
+.logoutButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.spinner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid rgba(15, 110, 148, 0.25);
+  border-top-color: #0f6e94;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinnerLight {
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .statsGrid {
@@ -316,6 +345,10 @@
 .badgeRed { background: #fdeceb; color: #c0392b; }
 
 .actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 9px 16px;
   border-radius: 8px;
   border: none;
@@ -333,6 +366,12 @@
   background: #0c5b7a;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(15, 110, 148, 0.35);
+}
+
+.actionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+  transform: none;
 }
 
 .doneLabel {
@@ -591,6 +630,9 @@
 }
 
 .deliveryFeeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 14px;
   border-radius: 8px;
   border: 1px solid #d7dee6;
@@ -606,6 +648,11 @@
 .deliveryFeeButton:hover {
   background: #f6f8fa;
   border-color: #b9c4d0;
+}
+
+.deliveryFeeButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .deliveryFeeCurrent {

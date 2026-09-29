@@ -5,6 +5,7 @@ import { ADMIN_COOKIE, isValidSessionToken } from '@/lib/adminAuth';
 import * as orderRepo from '@/data/orderRepository';
 import { logout } from './actions';
 import OrderGrid from './OrderGrid';
+import SubmitButton from './SubmitButton';
 import styles from './admin.module.css';
 
 export default async function AdminPage() {
@@ -36,9 +37,9 @@ export default async function AdminPage() {
             </div>
           </div>
           <form action={logout}>
-            <button type="submit" className={styles.logoutButton}>
+            <SubmitButton pendingLabel="Logging out…" className={styles.logoutButton}>
               Log out
-            </button>
+            </SubmitButton>
           </form>
         </div>
 

@@ -2,7 +2,7 @@ import { env } from '@/config/env';
 import { PRODUCTS, boxTierTable } from '@/config/products';
 import { Order } from '@/types/order';
 
-const DIVIDER = '────────────────────────────';
+const DIVIDER = '──────────────────';
 
 function formatMoney(amount: number): string {
   return Number(amount).toFixed(2).replace(/\.00$/, '');
@@ -18,11 +18,11 @@ function heading(title: string): string {
 
 function orderSummary(order: Order, note?: string): string {
   const metaLines = [
-    `*Order ID*: *${order.id}*`,
-    `*Total*: *₹${formatMoney(order.amount)}*${note ? ` _(${note})_` : ''}`,
+    `🛒 *Order ID*: *${order.id}*`,
+    `🧾 *Total*: *₹${formatMoney(order.amount)}*${note ? ` _(${note})_` : ''}`,
   ];
   if (order.razorpay.paymentId) {
-    metaLines.push(`*Payment ID*: *${order.razorpay.paymentId}*`);
+    metaLines.push(`🔖 *Payment ID*: *${order.razorpay.paymentId}*`);
   }
 
   const itemBlocks = order.items.map((item) => {
@@ -35,7 +35,7 @@ function orderSummary(order: Order, note?: string): string {
     ].join('\n');
   });
 
-  return joinSections(metaLines.join('\n'), itemBlocks.join('\n\n'));
+  return joinSections(metaLines.join('\n'), itemBlocks.join('\n'));
 }
 
 function freeDeliveryLine(): string {
@@ -53,10 +53,13 @@ function footer(): string {
 function catalogEntry(code: '1L' | '500ML'): string {
   const product = PRODUCTS[code];
   const tierLines = boxTierTable(code)
-    .map((row) => `   *${row.boxes} Box${row.boxes > 1 ? 'es' : ''}* (${row.pieces} pcs) — ₹${formatMoney(row.price)}`)
+    .map(
+      (row) =>
+        `*${row.boxes} Box${row.boxes > 1 ? 'es' : ''}* (${row.pieces} pcs) — *₹${formatMoney(row.price)}*`
+    )
     .join('\n');
 
-  return [`🔹 *${product.label} Bottles* — ${product.piecesPerBox} pcs/box`, tierLines].join('\n');
+  return [`_${product.label} | ${product.piecesPerBox} pcs/Box 🥤_`, tierLines].join('\n');
 }
 
 export function welcomeMessage(name?: string | null): string {

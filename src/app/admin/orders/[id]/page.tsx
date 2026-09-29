@@ -8,6 +8,7 @@ import * as customerRepo from '@/data/customerRepository';
 import { PRODUCTS } from '@/config/products';
 import { OrderStatus } from '@/types/order';
 import { markDelivered, markPaid, setDeliveryFee } from '../../actions';
+import SubmitButton from '../../SubmitButton';
 import styles from '../../admin.module.css';
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
@@ -172,9 +173,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     placeholder="0.00"
                     className={styles.deliveryFeeInput}
                   />
-                  <button type="submit" className={styles.deliveryFeeButton}>
+                  <SubmitButton pendingLabel="Saving…" className={styles.deliveryFeeButton}>
                     {order.deliveryFee != null ? 'Update' : 'Add Fee'}
-                  </button>
+                  </SubmitButton>
                 </form>
                 {order.deliveryFee != null && (
                   <p className={styles.deliveryFeeCurrent}>Current fee: ₹{order.deliveryFee.toFixed(2)}</p>
@@ -202,17 +203,17 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
               {!isFinal && !order.paid && (
                 <form action={markPaid.bind(null, order.id)}>
-                  <button type="submit" className={styles.actionButton}>
+                  <SubmitButton pendingLabel="Marking as paid…" className={styles.actionButton} light>
                     Mark as Paid
-                  </button>
+                  </SubmitButton>
                 </form>
               )}
 
               {!isFinal && order.paid && (
                 <form action={markDelivered.bind(null, order.id)}>
-                  <button type="submit" className={styles.actionButton}>
+                  <SubmitButton pendingLabel="Marking as delivered…" className={styles.actionButton} light>
                     Mark as Delivered
-                  </button>
+                  </SubmitButton>
                 </form>
               )}
 
