@@ -38,9 +38,9 @@ export class MongoCollection<T extends BaseRecord> {
     return collection.find({}, { projection: { _id: 0 } }).toArray() as Promise<T[]>;
   }
 
-  async insert(data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
+  async insert(data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>, id?: string): Promise<T> {
     const now = new Date().toISOString();
-    const record = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, ...data } as T;
+    const record = { id: id || crypto.randomUUID(), createdAt: now, updatedAt: now, ...data } as T;
     const collection = await this.getCollection();
     await collection.insertOne(record as any);
     return record;

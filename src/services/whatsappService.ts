@@ -182,8 +182,45 @@ export function sendPaymentChoice(to: string, order: Order): Promise<void> {
   ]);
 }
 
+// Meta's native "Send Address" form (India only) - opens a structured form
+// (name, phone, house/floor/tower, pin code, landmark, city) inside WhatsApp
+// instead of asking the customer to type a free-text address.
+async function sendAddressRequest(to: string, bodyText: string): Promise<void> {
+  const url = `https://graph.facebook.com/${env.whatsapp.meta.apiVersion}/${env.whatsapp.meta.phoneNumberId}/messages`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.whatsapp.meta.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'interactive',
+        interactive: {
+          type: 'address_message',
+          body: { text: bodyText },
+          action: {
+            name: 'address_message',
+            parameters: { country: 'IN' },
+          },
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      throw new Error(`Meta API error (${res.status}): ${errorBody}`);
+    }
+  } catch (err) {
+    console.error(`WhatsApp address request send error (to ${to}):`, err instanceof Error ? err.message : err);
+    await sendText(to, `${bodyText}\n\n_Please reply with your full delivery address._`);
+  }
+}
+
 export function sendAskAddress(to: string, order: Order): Promise<void> {
-  return sendText(to, templates.askAddressMessage(order));
+  return sendAddressRequest(to, templates.askAddressMessage(order));
 }
 
 export function sendCodConfirmation(to: string, order: Order): Promise<void> {

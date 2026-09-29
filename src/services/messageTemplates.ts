@@ -97,7 +97,7 @@ export function askAddressMessage(order: Order): string {
   return joinSections(
     heading('Order Summary'),
     orderSummary(order),
-    '📍 *Please reply with your full delivery address* so we can get your order to you.'
+    '📍 *Please confirm your address and contact info* so we can get your order to you.'
   );
 }
 

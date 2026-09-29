@@ -9,6 +9,23 @@ import { handleIncomingMessage, IncomingMessage } from '@/services/botService';
 // the whole flow (a couple of small API calls + a JSON file write) takes a
 // few hundred ms, well under Meta's webhook timeout.
 
+// Formats Meta's structured "Send Address" form reply (India layout) into a
+// single readable multi-line string, the same shape the rest of the app
+// expects for `order.address`.
+function formatAddressReply(values: Record<string, string>): string {
+  const lines = [
+    [values.house_number, values.floor_number && `Floor ${values.floor_number}`, values.tower_number]
+      .filter(Boolean)
+      .join(', '),
+    values.building_name,
+    values.address,
+    values.landmark_area,
+    [values.city, values.in_pin_code].filter(Boolean).join(' – '),
+  ].filter((line): line is string => !!line && line.trim().length > 0);
+
+  return lines.join('\n');
+}
+
 function extractMetaMessage(body: any): IncomingMessage | null {
   const value = body?.entry?.[0]?.changes?.[0]?.value;
   const message = value?.messages?.[0];
@@ -26,6 +43,18 @@ function extractMetaMessage(body: any): IncomingMessage | null {
   // button's `id` back, which we treat exactly like a typed command.
   if (message.type === 'interactive' && message.interactive?.type === 'button_reply') {
     return { waId, name, text: message.interactive.button_reply.id };
+  }
+
+  // A submission of the native "Send Address" form - Meta returns the
+  // structured fields the customer filled in, which we flatten into the
+  // same free-text address string the rest of the app stores.
+  if (message.type === 'interactive' && message.interactive?.type === 'address_message') {
+    const values = message.interactive.address_message?.values || {};
+    const contactName = values.name || name;
+    const contactPhone = values.phone_number;
+    const addressText = formatAddressReply(values);
+    const text = [addressText, contactPhone && `Phone: ${contactPhone}`].filter(Boolean).join('\n');
+    return { waId, name: contactName, text };
   }
 
   // A WhatsApp Commerce cart checkout - the customer picked items from the

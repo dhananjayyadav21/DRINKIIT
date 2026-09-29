@@ -25,10 +25,6 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   CANCELLED: 'Cancelled',
 };
 
-function shortId(id: string): string {
-  return id.slice(0, 8);
-}
-
 function PaymentCell({ order }: { order: Order }) {
   const razorpay = order.razorpay || { paymentLinkId: null, paymentLinkUrl: null, paymentId: null };
 
@@ -147,9 +143,7 @@ export default async function AdminPage() {
                   {orders.map((order) => (
                     <tr key={order.id}>
                       <td>
-                        <span className={`${styles.mono} ${styles.orderId}`} title={order.id}>
-                          {shortId(order.id)}
-                        </span>
+                        <span className={`${styles.mono} ${styles.orderId}`}>{order.id}</span>
                       </td>
                       <td>
                         <div className={styles.customerName}>{order.waId}</div>
