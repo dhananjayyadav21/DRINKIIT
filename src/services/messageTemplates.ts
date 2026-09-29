@@ -17,22 +17,25 @@ function heading(title: string): string {
 }
 
 function orderSummary(order: Order, note?: string): string {
-  const itemLines = order.items.map((item) => {
-    const product = PRODUCTS[item.product];
-    const pieces = item.quantity * product.piecesPerBox;
-    const boxLabel = `Box${item.quantity > 1 ? 'es' : ''}`;
-    return `*${product.label}* — ${item.quantity} ${boxLabel} (${pieces} pcs) — ₹${formatMoney(item.amount)}`;
-  });
-
-  const lines = [
+  const metaLines = [
     `*Order ID*: *${order.id}*`,
-    ...itemLines,
     `*Total*: *₹${formatMoney(order.amount)}*${note ? ` _(${note})_` : ''}`,
   ];
   if (order.razorpay.paymentId) {
-    lines.push(`*Payment ID*: *${order.razorpay.paymentId}*`);
+    metaLines.push(`*Payment ID*: *${order.razorpay.paymentId}*`);
   }
-  return lines.join('\n');
+
+  const itemBlocks = order.items.map((item) => {
+    const product = PRODUCTS[item.product];
+    const pieces = item.quantity * product.piecesPerBox;
+    const boxLabel = `Box${item.quantity > 1 ? 'es' : ''}`;
+    return [
+      `🥤 *${product.label}* — ${item.quantity} ${boxLabel} (${pieces} pcs)`,
+      `🏷️ ₹${formatMoney(item.amount)}`,
+    ].join('\n');
+  });
+
+  return joinSections(metaLines.join('\n'), itemBlocks.join('\n\n'));
 }
 
 function freeDeliveryLine(): string {
