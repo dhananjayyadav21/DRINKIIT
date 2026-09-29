@@ -12,6 +12,7 @@ export default function SiteNav() {
         </Link>
         <nav className={styles.navLinks}>
           <Link href="/">Home</Link>
+          <Link href="/#products">Products</Link>
           <Link href="/about">About</Link>
           <Link href="/privacy">Privacy Policy</Link>
         </nav>

@@ -3,68 +3,9 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ADMIN_COOKIE, isValidSessionToken } from '@/lib/adminAuth';
 import * as orderRepo from '@/data/orderRepository';
-import { Order, OrderStatus } from '@/types/order';
-import { logout, markDelivered } from './actions';
+import { logout } from './actions';
+import OrderGrid from './OrderGrid';
 import styles from './admin.module.css';
-
-const STATUS_BADGE: Record<OrderStatus, string> = {
-  PENDING_VERIFICATION: styles.badgeGray,
-  VERIFIED: styles.badgeBlue,
-  AWAITING_PAYMENT: styles.badgeOrange,
-  CONFIRMED: styles.badgeGreen,
-  DELIVERED: styles.badgePurple,
-  CANCELLED: styles.badgeRed,
-};
-
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  PENDING_VERIFICATION: 'Pending OTP',
-  VERIFIED: 'Verified',
-  AWAITING_PAYMENT: 'Awaiting Payment',
-  CONFIRMED: 'Confirmed',
-  DELIVERED: 'Delivered',
-  CANCELLED: 'Cancelled',
-};
-
-function PaymentCell({ order }: { order: Order }) {
-  const razorpay = order.razorpay || { paymentLinkId: null, paymentLinkUrl: null, paymentId: null };
-
-  if (order.paymentMethod === 'COD') {
-    return <span className={`${styles.badge} ${styles.badgeGray}`}>COD</span>;
-  }
-
-  if (order.paymentMethod === 'ONLINE') {
-    if (order.paid) {
-      return (
-        <div>
-          <span className={`${styles.badge} ${styles.badgeGreen}`}>
-            <span className={styles.dot} />
-            Paid online
-          </span>
-          {razorpay.paymentId && (
-            <span className={`${styles.paymentRef} ${styles.mono}`} title={razorpay.paymentId}>
-              {razorpay.paymentId}
-            </span>
-          )}
-        </div>
-      );
-    }
-    return (
-      <div>
-        <span className={`${styles.badge} ${styles.badgeOrange}`}>
-          <span className={styles.dot} />
-          Unpaid
-        </span>
-        {razorpay.paymentLinkId && (
-          <span className={`${styles.paymentRef} ${styles.mono}`} title={razorpay.paymentLinkId}>
-            link: {razorpay.paymentLinkId}
-          </span>
-        )}
-      </div>
-    );
-  }
-
-  return <span className={styles.doneLabel}>—</span>;
-}
 
 export default async function AdminPage() {
   const cookieStore = await cookies();
@@ -120,74 +61,7 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className={styles.card}>
-          {orders.length === 0 ? (
-            <div className={styles.emptyState}>No orders yet — they will show up here as customers order on WhatsApp.</div>
-          ) : (
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Product</th>
-                    <th>Amount</th>
-                    <th>Payment</th>
-                    <th>Address</th>
-                    <th>Status</th>
-                    <th>Placed</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map((order) => (
-                    <tr key={order.id}>
-                      <td>
-                        <span className={`${styles.mono} ${styles.orderId}`}>{order.id}</span>
-                      </td>
-                      <td>
-                        <div className={styles.customerName}>{order.waId}</div>
-                        <div className={styles.customerPhone}>WhatsApp customer</div>
-                      </td>
-                      <td>
-                        {(order.items || []).map((item, i) => (
-                          <div key={i}>
-                            {item.product} × {item.quantity}
-                          </div>
-                        ))}
-                      </td>
-                      <td className={styles.amount}>₹{order.amount}</td>
-                      <td>
-                        <PaymentCell order={order} />
-                      </td>
-                      <td className={styles.addressCell} title={order.address || undefined}>
-                        {order.address || <span className={styles.doneLabel}>—</span>}
-                      </td>
-                      <td>
-                        <span className={`${styles.badge} ${STATUS_BADGE[order.status]}`}>
-                          <span className={styles.dot} />
-                          {STATUS_LABEL[order.status]}
-                        </span>
-                      </td>
-                      <td className={styles.placedAt}>{new Date(order.createdAt).toLocaleString()}</td>
-                      <td>
-                        {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' ? (
-                          <form action={markDelivered.bind(null, order.id)}>
-                            <button type="submit" className={styles.actionButton}>
-                              Mark Complete
-                            </button>
-                          </form>
-                        ) : (
-                          <span className={styles.doneLabel}>—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <OrderGrid orders={orders} />
       </div>
     </div>
   );

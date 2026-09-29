@@ -33,11 +33,42 @@ export async function logout(): Promise<void> {
   redirect('/');
 }
 
+export async function markPaid(orderId: string): Promise<void> {
+  const order = await orderRepo.findById(orderId);
+  if (!order || order.paid) return;
+  order.paid = true;
+  await orderRepo.save(order);
+  revalidatePath('/admin');
+  revalidatePath(`/admin/orders/${orderId}`);
+}
+
 export async function markDelivered(orderId: string): Promise<void> {
   const order = await orderRepo.findById(orderId);
-  if (!order) return;
+  if (!order || !order.paid) return;
   order.status = 'DELIVERED';
   await orderRepo.save(order);
   revalidatePath('/admin');
+  revalidatePath(`/admin/orders/${orderId}`);
   await whatsapp.sendOrderDelivered(order.waId, order);
+}
+
+// Optional, admin-entered delivery charge (e.g. for an out-of-radius COD
+// order) - left unset for the standard free delivery. Passing an empty
+// value clears a previously set fee.
+export async function setDeliveryFee(orderId: string, formData: FormData): Promise<void> {
+  const order = await orderRepo.findById(orderId);
+  if (!order) return;
+
+  const raw = String(formData.get('deliveryFee') || '').trim();
+  if (raw === '') {
+    order.deliveryFee = null;
+  } else {
+    const fee = Number(raw);
+    if (!Number.isFinite(fee) || fee < 0) return;
+    order.deliveryFee = Math.round(fee * 100) / 100;
+  }
+
+  await orderRepo.save(order);
+  revalidatePath('/admin');
+  revalidatePath(`/admin/orders/${orderId}`);
 }

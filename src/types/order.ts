@@ -22,6 +22,9 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paid: boolean;
   address: string | null;
+  // Optional manual delivery charge an admin can add for COD orders (e.g. for
+  // out-of-radius deliveries). Left null when the standard free delivery applies.
+  deliveryFee: number | null;
   otp: string;
   otpExpiresAt: string;
   otpAttempts: number;

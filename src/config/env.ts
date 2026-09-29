@@ -50,6 +50,8 @@ export const env = {
     contactPhone: process.env.BUSINESS_CONTACT_PHONE || '',
     contactEmail: process.env.BUSINESS_CONTACT_EMAIL || '',
     address: process.env.BUSINESS_ADDRESS || '',
+    // Optional - shown on invoices only when set (GSTIN, if registered).
+    gstNumber: process.env.BUSINESS_GST_NUMBER || '',
   },
 
   admin: {

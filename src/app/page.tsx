@@ -102,7 +102,7 @@ export default function Home() {
         ))}
       </div>
 
-      <section className={styles.section}>
+      <section id="products" className={styles.section} style={{ scrollMarginTop: '80px' }}>
         <div className={styles.sectionHeader}>
           <span className={styles.sectionEyebrow}>Our Products</span>
           <h2 className={styles.sectionTitle}>Trusted packaged water brands</h2>

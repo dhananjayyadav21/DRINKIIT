@@ -34,6 +34,7 @@ export function create(data: Partial<Order> & Pick<Order, 'customer' | 'waId' | 
       paymentMethod: null,
       paid: false,
       address: null,
+      deliveryFee: null,
       otp: '',
       otpExpiresAt: '',
       otpAttempts: 0,

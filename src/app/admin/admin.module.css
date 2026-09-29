@@ -95,6 +95,52 @@
   transform: translateY(-1px);
 }
 
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #d7dee6;
+  background: #ffffff;
+  font-size: 13.5px;
+  color: #12233e;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.searchInput::placeholder {
+  color: #97a1ae;
+}
+
+.searchInput:focus {
+  border-color: #0f6e94;
+  box-shadow: 0 0 0 3px rgba(15, 110, 148, 0.14);
+}
+
+.clearSearchLink {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7686;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.clearSearchLink:hover {
+  color: #12233e;
+}
+
 .statLabel {
   font-size: 11.5px;
   font-weight: 700;
@@ -128,54 +174,109 @@
   font-size: 14px;
 }
 
-.tableWrap {
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-  min-width: 800px;
-}
-
-.table thead th {
-  text-align: left;
-  padding: 14px 16px;
-  background: #f7f9fb;
+.emptyStateCard {
+  background: #ffffff;
+  border: 1px solid #e5e9ee;
+  border-radius: 16px;
+  padding: 64px 24px;
+  text-align: center;
   color: #6b7686;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  border-bottom: 1px solid #e5e9ee;
-  white-space: nowrap;
+  font-size: 14px;
 }
 
-.table tbody tr {
-  border-bottom: 1px solid #eef1f4;
-  transition: background 0.12s;
-}
-
-.table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.table tbody tr:hover {
-  background: #f9fbfc;
-}
-
-.table td {
-  padding: 15px 16px;
-  vertical-align: middle;
+.orderGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 @media (min-width: 640px) {
-  .table thead th,
-  .table td {
-    padding-left: 20px;
-    padding-right: 20px;
+  .orderGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
+}
+
+@media (min-width: 1024px) {
+  .orderGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.orderCard {
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e5e9ee;
+  border-radius: 14px;
+  padding: 18px 20px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 10px rgba(18, 35, 62, 0.04);
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+}
+
+.orderCard:hover {
+  box-shadow: 0 12px 26px rgba(18, 35, 62, 0.1);
+  transform: translateY(-2px);
+  border-color: #cdd7e0;
+}
+
+.orderCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.orderCardItems {
+  font-size: 13.5px;
+  color: #2c3a4e;
+  font-weight: 600;
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+
+.orderCardMeta {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed #e5e9ee;
+  margin-bottom: 12px;
+}
+
+.orderCardCustomer {
+  font-size: 13px;
+  font-weight: 600;
+  color: #12233e;
+  margin: 0 0 3px;
+}
+
+.orderCardDate {
+  font-size: 11.5px;
+  color: #97a1ae;
+  margin: 0;
+}
+
+.orderCardAmount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f6e94;
+  margin: 0;
+}
+
+.orderCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.actionNeeded {
+  font-size: 12px;
+  font-weight: 700;
+  color: #b5730a;
 }
 
 .mono {
@@ -186,33 +287,6 @@
 .orderId {
   color: #4c5a6e;
   cursor: default;
-}
-
-.customerName {
-  font-weight: 600;
-  color: #12233e;
-}
-
-.customerPhone {
-  color: #97a1ae;
-  font-size: 12px;
-  margin-top: 2px;
-}
-
-.amount {
-  font-weight: 700;
-  color: #12233e;
-}
-
-.paymentRef {
-  display: block;
-  color: #97a1ae;
-  margin-top: 4px;
-}
-
-.placedAt {
-  color: #97a1ae;
-  font-size: 12px;
 }
 
 .badge {
@@ -266,11 +340,277 @@
   font-size: 12px;
 }
 
-.addressCell {
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Order detail page */
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .detailGrid {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+
+.detailCard {
+  background: #ffffff;
+  border: 1px solid #e5e9ee;
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 2px 10px rgba(18, 35, 62, 0.04);
+}
+
+.detailCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detailCardTitle {
+  font-family: var(--font-display, inherit);
+  font-size: 16px;
+  font-weight: 700;
+  color: #12233e;
+  margin: 0 0 16px;
+}
+
+.detailCardHeader .detailCardTitle {
+  margin: 0;
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e5e9ee;
+}
+
+.itemRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.itemName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #12233e;
+  margin: 0 0 3px;
+}
+
+.itemMeta {
   font-size: 12.5px;
-  color: #4c5a6e;
+  color: #6b7686;
+  margin: 0;
+}
+
+.itemAmount {
+  font-size: 14px;
+  font-weight: 700;
+  color: #12233e;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subtotalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: #6b7686;
+  padding: 2px 0;
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 2px solid #12233e;
+  font-size: 14px;
+  font-weight: 700;
+  color: #12233e;
+}
+
+.totalAmount {
+  font-size: 18px;
+  color: #0f6e94;
+}
+
+.detailList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detailList dt {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #97a1ae;
+  margin: 0 0 4px;
+}
+
+.detailList dd {
+  margin: 0;
+  font-size: 14px;
+  color: #12233e;
+}
+
+.addressText {
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+.actionsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.actionsStack .actionButton {
+  width: 100%;
+  text-align: center;
+}
+
+.secondaryActionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid #d7dee6;
+  background: #ffffff;
+  color: #2c3a4e;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.secondaryActionButton:hover {
+  background: #f6f8fa;
+  border-color: #b9c4d0;
+}
+
+.inlineIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.actionHint {
+  font-size: 12.5px;
+  color: #97a1ae;
+  margin: 0;
+}
+
+.deliveryFeeSection {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed #e5e9ee;
+}
+
+.deliveryFeeLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #97a1ae;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.optionalTag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #b3bcc7;
+  background: #f6f8fa;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.deliveryFeeHint {
+  font-size: 12px;
+  color: #97a1ae;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.deliveryFeeForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deliveryFeePrefix {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7686;
+}
+
+.deliveryFeeInput {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d7dee6;
+  background: #ffffff;
+  font-size: 13px;
+  color: #12233e;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.deliveryFeeInput:focus {
+  border-color: #0f6e94;
+  box-shadow: 0 0 0 3px rgba(15, 110, 148, 0.14);
+}
+
+.deliveryFeeButton {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #d7dee6;
+  background: #ffffff;
+  color: #2c3a4e;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.deliveryFeeButton:hover {
+  background: #f6f8fa;
+  border-color: #b9c4d0;
+}
+
+.deliveryFeeCurrent {
+  font-size: 12px;
+  color: #1c8a4c;
+  font-weight: 600;
+  margin: 8px 0 0;
 }
