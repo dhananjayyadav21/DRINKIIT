@@ -46,10 +46,16 @@ function extractMetaMessage(body: any): IncomingMessage | null {
   }
 
   // A submission of the native "Send Address" form - Meta returns the
-  // structured fields the customer filled in, which we flatten into the
-  // same free-text address string the rest of the app stores.
-  if (message.type === 'interactive' && message.interactive?.type === 'address_message') {
-    const values = message.interactive.address_message?.values || {};
+  // structured fields the customer filled in as a JSON-encoded string
+  // (nfm_reply.response_json), which we parse and flatten into the same
+  // free-text address string the rest of the app stores.
+  if (message.type === 'interactive' && message.interactive?.type === 'nfm_reply') {
+    let values: Record<string, string> = {};
+    try {
+      values = JSON.parse(message.interactive.nfm_reply?.response_json || '{}');
+    } catch (err) {
+      console.error('Failed to parse address form response_json:', err);
+    }
     const contactName = values.name || name;
     const contactPhone = values.phone_number;
     const addressText = formatAddressReply(values);
