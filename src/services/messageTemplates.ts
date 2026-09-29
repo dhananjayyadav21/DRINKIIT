@@ -40,7 +40,7 @@ function freeDeliveryLine(): string {
 }
 
 function contactLine(): string {
-  return env.business.whatsappNumber ? `📞 Contact us: +${env.business.whatsappNumber}` : '';
+  return env.business.whatsappNumber ? `📞 Need help? Call us at +${env.business.whatsappNumber}` : '';
 }
 
 function footer(): string {
@@ -58,7 +58,11 @@ function catalogEntry(code: '1L' | '500ML'): string {
 
 export function welcomeMessage(name?: string | null): string {
   const greetingName = name ? `, ${name}` : '';
-  return `👋 Welcome to *${env.business.name}*${greetingName}!\nWe deliver clean drinking water bottles straight to your door.`;
+  return joinSections(
+    `👋 *Welcome to ${env.business.name}${greetingName}!*`,
+    "We deliver clean, purified drinking water bottles straight to your door — quick, reliable and hassle-free.",
+    '_Take a look at our price list below to get started._'
+  );
 }
 
 export function catalogMessage(): string {
@@ -67,37 +71,37 @@ export function catalogMessage(): string {
     catalogEntry('1L'),
     catalogEntry('500ML'),
     freeDeliveryLine(),
-    '_Tap "View catalog" below to browse and order._'
+    '👉 *Tap "View catalog" below* to browse our products and add them to your cart.'
   );
 }
 
 export function helpMessage(): string {
   return joinSections(
-    "🤔 Sorry, I didn't understand that.",
-    'Say *Hi* to see our price list and browse the catalog.'
+    "🤔 Sorry, I didn't quite get that.",
+    'Just say *Hi* anytime to see our price list and start an order — it only takes a minute.'
   );
 }
 
 export function cartUnresolvedMessage(): string {
   return joinSections(
-    heading("Couldn't Process Cart ⚠️"),
-    "We couldn't match the items in your cart to our product list.",
-    'Please try again, or message us directly to place your order.'
+    heading("We Couldn't Process That Cart ⚠️"),
+    "A couple of items in your cart didn't match anything in our current price list.",
+    'Please try adding items from the catalog again, or say *Hi* to see the latest options.'
   );
 }
 
 export function noPendingOrderMessage(): string {
   return joinSections(
-    "You don't have a pending order right now.",
-    'Say *Hi* to see our price list and start a new order.'
+    "You don't have an order in progress right now.",
+    'Say *Hi* to see our price list and place a new order.'
   );
 }
 
 export function askAddressMessage(order: Order): string {
   return joinSections(
-    heading('Order Summary'),
+    heading('Order Received ✅'),
     orderSummary(order),
-    '📍 *Please confirm your address and contact info* so we can get your order to you.'
+    '📍 *One last step —* please confirm your delivery address and contact number so we can get this order to you.'
   );
 }
 
@@ -105,7 +109,7 @@ export function paymentChoiceMessage(order: Order): string {
   return joinSections(
     heading('Order Summary'),
     orderSummary(order),
-    '💳 *How would you like to pay?*'
+    '💳 *How would you like to pay?* Choose an option below.'
   );
 }
 
@@ -113,7 +117,7 @@ export function codConfirmationMessage(order: Order): string {
   return joinSections(
     heading('Order Confirmed 🎉'),
     orderSummary(order, 'Pay on delivery'),
-    `${freeDeliveryLine()}. Our team will contact you shortly.`,
+    `${freeDeliveryLine()}\nOur delivery team will reach out shortly to confirm timing.`,
     contactLine(),
     footer()
   );
@@ -121,9 +125,9 @@ export function codConfirmationMessage(order: Order): string {
 
 export function paymentLinkErrorMessage(): string {
   return joinSections(
-    heading('Payment Link Failed ⚠️'),
-    "We couldn't generate your payment link right now.",
-    'Please try again in a moment, or contact us and we’ll help you complete the order.'
+    heading("We Hit a Snag ⚠️"),
+    "We couldn't generate your payment link just now.",
+    'Please try again in a moment — or contact us directly and we’ll help you complete the order right away.'
   );
 }
 
@@ -131,7 +135,7 @@ export function paymentLinkMessage(order: Order): string {
   return joinSections(
     heading('Complete Your Payment 💳'),
     orderSummary(order),
-    '_Tap the button below to pay securely. This link is valid for 24 hours._'
+    '👉 *Tap the button below* to pay securely online. This link stays valid for 24 hours.'
   );
 }
 
@@ -139,7 +143,7 @@ export function paidConfirmationMessage(order: Order): string {
   return joinSections(
     heading('Payment Received ✅'),
     orderSummary(order, 'Paid'),
-    freeDeliveryLine(),
+    `${freeDeliveryLine()}\nYour order is confirmed and will be on its way soon.`,
     contactLine(),
     footer()
   );
@@ -150,8 +154,8 @@ export function orderInProgressMessage(order: Order): string {
     heading('Order In Progress 🚚'),
     orderSummary(order),
     DIVIDER,
-    "Your order is packed and on its way — we're getting it delivered to you soon!",
-    '🙋 *Need help or have a question?* Tap the button below to contact us anytime.',
+    "Your order is packed and on its way — we're getting it to you as soon as possible!",
+    '🙋 *Have a question about your delivery?* Tap below to contact us directly.',
     footer()
   );
 }
@@ -161,7 +165,7 @@ export function orderDeliveredMessage(order: Order): string {
     heading('Order Delivered ✅'),
     orderSummary(order),
     DIVIDER,
-    '📦 Your order has been delivered. We hope you enjoy it!',
-    `Thank you for choosing *${env.business.name}* — we hope to serve you again soon! 💧🙏`
+    '📦 Your order has been delivered — we hope you enjoy it!',
+    `Thank you for choosing *${env.business.name}*. We'd love to serve you again soon! 💧🙏`
   );
 }
