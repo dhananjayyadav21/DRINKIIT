@@ -93,6 +93,14 @@ export function noPendingOrderMessage(): string {
   );
 }
 
+export function askAddressMessage(order: Order): string {
+  return joinSections(
+    heading('Order Summary'),
+    orderSummary(order),
+    '📍 *Please reply with your full delivery address* so we can get your order to you.'
+  );
+}
+
 export function paymentChoiceMessage(order: Order): string {
   return joinSections(
     heading('Order Summary'),
@@ -106,7 +114,6 @@ export function codConfirmationMessage(order: Order): string {
     heading('Order Confirmed 🎉'),
     orderSummary(order, 'Pay on delivery'),
     `${freeDeliveryLine()}. Our team will contact you shortly.`,
-    '📍 *Please reply with your full delivery address* so we can get your order to you.',
     contactLine(),
     footer()
   );
@@ -133,7 +140,6 @@ export function paidConfirmationMessage(order: Order): string {
     heading('Payment Received ✅'),
     orderSummary(order, 'Paid'),
     freeDeliveryLine(),
-    '📍 *Please reply with your full delivery address* so we can get your order to you.',
     contactLine(),
     footer()
   );
@@ -157,13 +163,5 @@ export function orderDeliveredMessage(order: Order): string {
     DIVIDER,
     '📦 Your order has been delivered. We hope you enjoy it!',
     `Thank you for choosing *${env.business.name}* — we hope to serve you again soon! 💧🙏`
-  );
-}
-
-export function addressReceivedMessage(): string {
-  return joinSections(
-    heading('Address Confirmed 📍'),
-    "Thanks! We've noted your delivery address.",
-    'Your order is all set — we’ll reach out if we need anything else. Have a great day! 👋'
   );
 }

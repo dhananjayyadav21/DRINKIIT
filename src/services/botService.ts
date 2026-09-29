@@ -156,10 +156,10 @@ async function createOrderAndAskPayment(
   });
 
   customer.currentOrder = order.id;
-  customer.state = 'AWAITING_PAYMENT_CHOICE';
+  customer.state = 'AWAITING_ADDRESS';
   await customerRepo.save(customer);
 
-  await whatsapp.sendPaymentChoice(customer.waId, order);
+  await whatsapp.sendAskAddress(customer.waId, order);
 }
 
 async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): Promise<void> {
@@ -180,7 +180,10 @@ async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): P
     order.paid = false;
     await orderRepo.save(order);
 
-    customer.state = 'AWAITING_ADDRESS';
+    // currentOrder is deliberately kept (not cleared) so a follow-up message
+    // from this customer while the order is still out for delivery is
+    // recognized as an "order in progress" check-in rather than a new order.
+    customer.state = 'CATALOG_SENT';
     await customerRepo.save(customer);
 
     await whatsapp.sendCodConfirmation(customer.waId, order);
@@ -214,18 +217,18 @@ async function handleAddressReceived(customer: Customer, address: string): Promi
   }
 
   const order = await orderRepo.findById(customer.currentOrder);
-  if (order) {
-    order.address = address;
-    await orderRepo.save(order);
+  if (!order) {
+    await whatsapp.sendNoPendingOrder(customer.waId);
+    return;
   }
 
-  // currentOrder is deliberately kept (not cleared) so a follow-up message
-  // from this customer while the order is still out for delivery is
-  // recognized as an "order in progress" check-in rather than a new order.
-  customer.state = 'CATALOG_SENT';
+  order.address = address;
+  await orderRepo.save(order);
+
+  customer.state = 'AWAITING_PAYMENT_CHOICE';
   await customerRepo.save(customer);
 
-  await whatsapp.sendAddressReceived(customer.waId);
+  await whatsapp.sendPaymentChoice(customer.waId, order);
 }
 
 export async function markOrderPaid(orderId: string, paymentId?: string | null): Promise<void> {
@@ -239,7 +242,10 @@ export async function markOrderPaid(orderId: string, paymentId?: string | null):
 
   const customer = await customerRepo.findById(order.customer);
   if (customer) {
-    customer.state = 'AWAITING_ADDRESS';
+    // currentOrder is deliberately kept (not cleared) so a follow-up message
+    // from this customer while the order is still out for delivery is
+    // recognized as an "order in progress" check-in rather than a new order.
+    customer.state = 'CATALOG_SENT';
     await customerRepo.save(customer);
   }
 

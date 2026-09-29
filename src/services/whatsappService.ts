@@ -182,6 +182,10 @@ export function sendPaymentChoice(to: string, order: Order): Promise<void> {
   ]);
 }
 
+export function sendAskAddress(to: string, order: Order): Promise<void> {
+  return sendText(to, templates.askAddressMessage(order));
+}
+
 export function sendCodConfirmation(to: string, order: Order): Promise<void> {
   return sendText(to, templates.codConfirmationMessage(order));
 }
@@ -196,10 +200,6 @@ export function sendPaymentLink(to: string, order: Order, link: string): Promise
 
 export function sendPaidConfirmation(to: string, order: Order): Promise<void> {
   return sendText(to, templates.paidConfirmationMessage(order));
-}
-
-export function sendAddressReceived(to: string): Promise<void> {
-  return sendText(to, templates.addressReceivedMessage());
 }
 
 // "Contact Us" CTA button - opens the customer's dialer straight to the
