@@ -17,6 +17,18 @@ const PENDING_CHECKOUT_STATES: Customer['state'][] = [
   'AWAITING_PAYMENT',
 ];
 
+// How long we keep treating a stray message (e.g. "Hi") as just a nudge that
+// re-sends the current step's prompt, rather than genuine evidence the
+// customer wandered off and needs to be asked whether to continue or start
+// over. `customer.updatedAt` is bumped every time we last prompted them, so
+// it doubles as "when did we last hear from/prompt this customer".
+const FOLLOW_UP_WINDOW_MS = 10 * 60 * 1000;
+
+function isWithinFollowUpWindow(customer: Customer): boolean {
+  const elapsed = Date.now() - new Date(customer.updatedAt).getTime();
+  return elapsed < FOLLOW_UP_WINDOW_MS;
+}
+
 export interface CartItem {
   retailerId: string;
   quantity: number;
@@ -108,22 +120,33 @@ async function processIncomingMessage({ waId, name, text, cartItems }: IncomingM
 
   // In the address step, any non-empty text is legitimately the address
   // itself - EXCEPT something that reads like the customer trying to start
-  // over (a greeting or a catalog request), which we treat as ambiguous
-  // rather than saving "hi" as their delivery address.
+  // over (a greeting or a catalog request), which is ambiguous rather than
+  // saved as their delivery address. If they're still well within the same
+  // conversation (< 10 min since we last prompted them), we just re-send the
+  // address prompt as a gentle nudge instead of interrupting with a choice
+  // dialog - that would feel like the bot lost track mid-chat. Only once
+  // they've been away longer do we ask whether to continue or start fresh.
   if (customer.state === 'AWAITING_ADDRESS' && raw.length > 0) {
     if (GREETING_RE.test(raw) || upper === 'CATALOG') {
+      if (isWithinFollowUpWindow(customer)) {
+        return handleResumeOrder(customer);
+      }
       return promptResumeOrRestart(customer);
     }
     return handleAddressReceived(customer, raw);
   }
 
   // Stuck at the payment-choice or payment-link step and the message isn't
-  // one of the payment buttons - ask whether to continue or start fresh
-  // instead of silently re-showing the catalog or a generic "didn't understand".
+  // one of the payment buttons. Same reasoning as above: recently prompted
+  // customers get a quiet re-nudge with the same step; only a longer gap
+  // triggers the continue-or-restart choice.
   if (
     (customer.state === 'AWAITING_PAYMENT_CHOICE' || customer.state === 'AWAITING_PAYMENT') &&
     raw.length > 0
   ) {
+    if (isWithinFollowUpWindow(customer)) {
+      return handleResumeOrder(customer);
+    }
     return promptResumeOrRestart(customer);
   }
 
