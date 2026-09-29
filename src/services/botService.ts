@@ -9,6 +9,14 @@ import { OrderStatus } from '@/types/order';
 
 const GREETING_RE = /^h+[iey]{1,4}$|^hello+$|^menu$|^start$/i;
 
+// States where the customer has an order mid-checkout (address or payment
+// step) and hasn't finished it yet.
+const PENDING_CHECKOUT_STATES: Customer['state'][] = [
+  'AWAITING_ADDRESS',
+  'AWAITING_PAYMENT_CHOICE',
+  'AWAITING_PAYMENT',
+];
+
 export interface CartItem {
   retailerId: string;
   quantity: number;
@@ -64,7 +72,21 @@ async function processIncomingMessage({ waId, name, text, cartItems }: IncomingM
   const raw = (text || '').trim();
   const upper = raw.toUpperCase();
 
+  if (upper === whatsapp.RESUME_CHOICE_BUTTONS.resume.id) {
+    return handleResumeOrder(customer);
+  }
+
+  if (upper === whatsapp.RESUME_CHOICE_BUTTONS.restart.id) {
+    return handleStartNewOrder(customer);
+  }
+
   if (cartItems && cartItems.length > 0) {
+    // A fresh cart while an earlier order is still mid-checkout is an
+    // explicit "I want to order again" signal - let the customer confirm
+    // before we abandon the stuck one.
+    if (PENDING_CHECKOUT_STATES.includes(customer.state)) {
+      return promptResumeOrRestart(customer);
+    }
     return handleCartOrder(customer, cartItems);
   }
 
@@ -84,8 +106,25 @@ async function processIncomingMessage({ waId, name, text, cartItems }: IncomingM
     return handlePaymentChoice(customer, choice);
   }
 
+  // In the address step, any non-empty text is legitimately the address
+  // itself - EXCEPT something that reads like the customer trying to start
+  // over (a greeting or a catalog request), which we treat as ambiguous
+  // rather than saving "hi" as their delivery address.
   if (customer.state === 'AWAITING_ADDRESS' && raw.length > 0) {
+    if (GREETING_RE.test(raw) || upper === 'CATALOG') {
+      return promptResumeOrRestart(customer);
+    }
     return handleAddressReceived(customer, raw);
+  }
+
+  // Stuck at the payment-choice or payment-link step and the message isn't
+  // one of the payment buttons - ask whether to continue or start fresh
+  // instead of silently re-showing the catalog or a generic "didn't understand".
+  if (
+    (customer.state === 'AWAITING_PAYMENT_CHOICE' || customer.state === 'AWAITING_PAYMENT') &&
+    raw.length > 0
+  ) {
+    return promptResumeOrRestart(customer);
   }
 
   // A customer with an order still out for delivery gets a status update
@@ -116,6 +155,65 @@ async function findInProgressOrder(customer: Customer) {
   const order = await orderRepo.findById(customer.currentOrder);
   if (!order || !IN_PROGRESS_STATUSES.includes(order.status)) return null;
   return order;
+}
+
+async function promptResumeOrRestart(customer: Customer): Promise<void> {
+  const order = customer.currentOrder ? await orderRepo.findById(customer.currentOrder) : null;
+  if (!order) {
+    // Nothing to actually resume - fall back to a clean slate.
+    return handleStartNewOrder(customer);
+  }
+  await whatsapp.sendResumeOrRestartChoice(customer.waId, order);
+}
+
+// Re-sends whatever prompt matches the customer's current checkout step,
+// without changing any state - used when they choose "Continue Order".
+async function handleResumeOrder(customer: Customer): Promise<void> {
+  if (!customer.currentOrder) {
+    await whatsapp.sendNoPendingOrder(customer.waId);
+    return;
+  }
+
+  const order = await orderRepo.findById(customer.currentOrder);
+  if (!order) {
+    await whatsapp.sendNoPendingOrder(customer.waId);
+    return;
+  }
+
+  if (customer.state === 'AWAITING_ADDRESS') {
+    await whatsapp.sendAskAddress(customer.waId, order);
+    return;
+  }
+
+  if (customer.state === 'AWAITING_PAYMENT_CHOICE') {
+    await whatsapp.sendPaymentChoice(customer.waId, order);
+    return;
+  }
+
+  if (customer.state === 'AWAITING_PAYMENT' && order.razorpay.paymentLinkUrl) {
+    await whatsapp.sendPaymentLink(customer.waId, order, order.razorpay.paymentLinkUrl);
+    return;
+  }
+
+  await whatsapp.sendNoPendingOrder(customer.waId);
+}
+
+// Cancels whatever order the customer had mid-checkout and sends them back
+// to a clean catalog - used when they choose "Start New Order".
+async function handleStartNewOrder(customer: Customer): Promise<void> {
+  if (customer.currentOrder) {
+    const order = await orderRepo.findById(customer.currentOrder);
+    if (order && order.status !== 'DELIVERED' && order.status !== 'CANCELLED') {
+      order.status = 'CANCELLED';
+      await orderRepo.save(order);
+    }
+  }
+
+  customer.currentOrder = null;
+  customer.state = 'CATALOG_SENT';
+  await customerRepo.save(customer);
+
+  await whatsapp.sendCatalog(customer.waId);
 }
 
 async function handleCartOrder(customer: Customer, cartItems: CartItem[]): Promise<void> {

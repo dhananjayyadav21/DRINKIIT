@@ -166,6 +166,22 @@ export function sendNoPendingOrder(to: string): Promise<void> {
   return sendText(to, templates.noPendingOrderMessage());
 }
 
+export const RESUME_CHOICE_BUTTONS = {
+  resume: { id: 'RESUME_ORDER', title: 'Continue Order' },
+  restart: { id: 'START_NEW_ORDER', title: 'Start New Order' },
+} as const;
+
+// Asked whenever a customer with an order stuck mid-checkout (address or
+// payment step) sends something that isn't the expected input for that step
+// (e.g. "Hi" or a fresh order command) - rather than silently treating it as
+// address text or dropping the order, we let them explicitly choose.
+export function sendResumeOrRestartChoice(to: string, order: Order): Promise<void> {
+  return sendButtons(to, templates.resumeOrRestartMessage(order), [
+    RESUME_CHOICE_BUTTONS.resume,
+    RESUME_CHOICE_BUTTONS.restart,
+  ]);
+}
+
 export function sendCartUnresolved(to: string): Promise<void> {
   return sendText(to, templates.cartUnresolvedMessage());
 }

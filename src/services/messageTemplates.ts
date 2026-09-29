@@ -13,7 +13,7 @@ function joinSections(...sections: string[]): string {
 }
 
 function heading(title: string): string {
-  return `*${title}*`;
+  return `*${title.toUpperCase()}*`;
 }
 
 function orderSummary(order: Order, note?: string): string {
@@ -21,26 +21,26 @@ function orderSummary(order: Order, note?: string): string {
     const product = PRODUCTS[item.product];
     const pieces = item.quantity * product.piecesPerBox;
     const boxLabel = `Box${item.quantity > 1 ? 'es' : ''}`;
-    return `💧 ${product.label} — ${item.quantity} ${boxLabel} (${pieces} pcs) — ₹${formatMoney(item.amount)}`;
+    return `*${product.label}* — ${item.quantity} ${boxLabel} (${pieces} pcs) — ₹${formatMoney(item.amount)}`;
   });
 
   const lines = [
-    `🆔 Order ID: *${order.id}*`,
+    `*Order ID*: *${order.id}*`,
     ...itemLines,
-    `💰 Total: ₹${formatMoney(order.amount)}${note ? ` _(${note})_` : ''}`,
+    `*Total*: *₹${formatMoney(order.amount)}*${note ? ` _(${note})_` : ''}`,
   ];
   if (order.razorpay.paymentId) {
-    lines.push(`🧾 Payment ID: *${order.razorpay.paymentId}*`);
+    lines.push(`*Payment ID*: *${order.razorpay.paymentId}*`);
   }
   return lines.join('\n');
 }
 
 function freeDeliveryLine(): string {
-  return `🚚 Free delivery within ${env.business.freeDeliveryRadiusKm}km`;
+  return `🚚 *Free delivery* within ${env.business.freeDeliveryRadiusKm}km`;
 }
 
 function contactLine(): string {
-  return env.business.whatsappNumber ? `📞 Need help? Call us at +${env.business.whatsappNumber}` : '';
+  return env.business.whatsappNumber ? `📞 *Need help?* Call us at *+${env.business.whatsappNumber}*` : '';
 }
 
 function footer(): string {
@@ -50,7 +50,7 @@ function footer(): string {
 function catalogEntry(code: '1L' | '500ML'): string {
   const product = PRODUCTS[code];
   const tierLines = boxTierTable(code)
-    .map((row) => `   ${row.boxes} Box${row.boxes > 1 ? 'es' : ''} (${row.pieces} pcs) — ₹${formatMoney(row.price)}`)
+    .map((row) => `   *${row.boxes} Box${row.boxes > 1 ? 'es' : ''}* (${row.pieces} pcs) — ₹${formatMoney(row.price)}`)
     .join('\n');
 
   return [`🔹 *${product.label} Bottles* — ${product.piecesPerBox} pcs/box`, tierLines].join('\n');
@@ -94,6 +94,14 @@ export function noPendingOrderMessage(): string {
   return joinSections(
     "You don't have an order in progress right now.",
     'Say *Hi* to see our price list and place a new order.'
+  );
+}
+
+export function resumeOrRestartMessage(order: Order): string {
+  return joinSections(
+    heading('You Have an Order in Progress ⏸️'),
+    orderSummary(order),
+    'Would you like to continue this order, or start a new one instead?'
   );
 }
 

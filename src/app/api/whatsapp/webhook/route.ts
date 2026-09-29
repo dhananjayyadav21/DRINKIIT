@@ -26,6 +26,32 @@ function formatAddressReply(values: Record<string, string>): string {
   return lines.join('\n');
 }
 
+// Pulls the structured "Send Address" form values out of an interactive
+// reply, whichever of Meta's shapes it arrives in (this has varied in
+// practice: nfm_reply.response_json as a JSON string, or an address_message
+// object with the fields already parsed).
+function extractAddressFormValues(interactive: any): Record<string, string> | null {
+  if (!interactive) return null;
+
+  if (interactive.nfm_reply?.response_json) {
+    try {
+      return JSON.parse(interactive.nfm_reply.response_json);
+    } catch (err) {
+      console.error('Failed to parse nfm_reply.response_json:', err);
+    }
+  }
+
+  if (interactive.address_message?.values) {
+    return interactive.address_message.values;
+  }
+
+  if (interactive.address?.values) {
+    return interactive.address.values;
+  }
+
+  return null;
+}
+
 function extractMetaMessage(body: any): IncomingMessage | null {
   const value = body?.entry?.[0]?.changes?.[0]?.value;
   const message = value?.messages?.[0];
@@ -46,21 +72,21 @@ function extractMetaMessage(body: any): IncomingMessage | null {
   }
 
   // A submission of the native "Send Address" form - Meta returns the
-  // structured fields the customer filled in as a JSON-encoded string
-  // (nfm_reply.response_json), which we parse and flatten into the same
-  // free-text address string the rest of the app stores.
-  if (message.type === 'interactive' && message.interactive?.type === 'nfm_reply') {
-    let values: Record<string, string> = {};
-    try {
-      values = JSON.parse(message.interactive.nfm_reply?.response_json || '{}');
-    } catch (err) {
-      console.error('Failed to parse address form response_json:', err);
+  // structured fields the customer filled in, which we flatten into the
+  // same free-text address string the rest of the app stores.
+  if (message.type === 'interactive') {
+    const values = extractAddressFormValues(message.interactive);
+    if (values) {
+      const contactName = values.name || name;
+      const contactPhone = values.phone_number;
+      const addressText = formatAddressReply(values);
+      const text = [addressText, contactPhone && `Phone: ${contactPhone}`].filter(Boolean).join('\n');
+      return { waId, name: contactName, text };
     }
-    const contactName = values.name || name;
-    const contactPhone = values.phone_number;
-    const addressText = formatAddressReply(values);
-    const text = [addressText, contactPhone && `Phone: ${contactPhone}`].filter(Boolean).join('\n');
-    return { waId, name: contactName, text };
+
+    // Unrecognized interactive reply shape - log it so we can add support
+    // for it, instead of silently falling through to the generic help text.
+    console.error('Unhandled interactive message payload:', JSON.stringify(message.interactive));
   }
 
   // A WhatsApp Commerce cart checkout - the customer picked items from the
