@@ -121,7 +121,7 @@ export function askAddressMessage(order: Order): string {
 
 export function paymentChoiceMessage(order: Order): string {
   return joinSections(
-    heading('Order Summary'),
+    heading('Order Summary 🧾'),
     orderSummary(order),
     '💳 *How would you like to pay?* Choose an option below.'
   );

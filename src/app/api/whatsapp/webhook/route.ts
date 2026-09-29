@@ -11,7 +11,10 @@ import { handleIncomingMessage, IncomingMessage } from '@/services/botService';
 
 // Formats Meta's structured "Send Address" form reply (India layout) into a
 // single readable multi-line string, the same shape the rest of the app
-// expects for `order.address`.
+// expects for `order.address`. Field names confirmed from a live payload:
+// name, phone_number, address, floor_number, landmark_area, city, state,
+// in_pin_code - house_number/tower_number/building_name are NOT sent even
+// when Meta's docs mention them, so they're treated as optional.
 function formatAddressReply(values: Record<string, string>): string {
   const lines = [
     [values.house_number, values.floor_number && `Floor ${values.floor_number}`, values.tower_number]
@@ -20,7 +23,7 @@ function formatAddressReply(values: Record<string, string>): string {
     values.building_name,
     values.address,
     values.landmark_area,
-    [values.city, values.in_pin_code].filter(Boolean).join(' – '),
+    [values.city, values.state, values.in_pin_code].filter(Boolean).join(', '),
   ].filter((line): line is string => !!line && line.trim().length > 0);
 
   return lines.join('\n');
@@ -28,14 +31,16 @@ function formatAddressReply(values: Record<string, string>): string {
 
 // Pulls the structured "Send Address" form values out of an interactive
 // reply, whichever of Meta's shapes it arrives in (this has varied in
-// practice: nfm_reply.response_json as a JSON string, or an address_message
-// object with the fields already parsed).
+// practice: nfm_reply.response_json as a JSON string - which itself can be
+// either the fields directly or wrapped in a `values` key - or an
+// address_message object with the fields already parsed).
 function extractAddressFormValues(interactive: any): Record<string, string> | null {
   if (!interactive) return null;
 
   if (interactive.nfm_reply?.response_json) {
     try {
-      return JSON.parse(interactive.nfm_reply.response_json);
+      const parsed = JSON.parse(interactive.nfm_reply.response_json);
+      return parsed?.values && typeof parsed.values === 'object' ? parsed.values : parsed;
     } catch (err) {
       console.error('Failed to parse nfm_reply.response_json:', err);
     }
