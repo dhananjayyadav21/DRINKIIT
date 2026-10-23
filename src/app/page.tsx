@@ -4,11 +4,6 @@ import styles from './home.module.css';
 import SiteNav from '@/components/SiteNav';
 import SiteFooter from '@/components/SiteFooter';
 import { env } from '@/config/env';
-import { PRODUCTS, unitPrice } from '@/config/products';
-
-function formatMoney(amount: number): string {
-  return Number(amount).toFixed(2).replace(/\.00$/, '');
-}
 
 function whatsappLink(prefill?: string): string {
   if (!env.business.whatsappNumber) return '/admin';
@@ -21,11 +16,6 @@ const TRUST_ITEMS = [
   { icon: '🚚', label: `Free delivery within ${env.business.freeDeliveryRadiusKm}km` },
   { icon: '⚡', label: 'Order in under a minute' },
   { icon: '🔒', label: 'Secure online payments' },
-];
-
-const BRANDS = [
-  { code: '1L' as const, name: 'Puresy', image: '/images/puresy-banner-outdoor.png' },
-  { code: '500ML' as const, name: 'Detox', image: '/images/detox-banner-outdoor.png' },
 ];
 
 const STEPS = [
@@ -81,7 +71,7 @@ export default function Home() {
           <div className={styles.heroVisual}>
             <div className={styles.heroImageFrame}>
               <Image
-                src="/images/detox-bottle-transparent.png"
+                src="/images/detox-bottle-transparent - 500ml.png"
                 alt="Packaged drinking water bottle delivered by DRINK IT"
                 fill
                 className={styles.heroImage}
@@ -101,47 +91,6 @@ export default function Home() {
           </div>
         ))}
       </div>
-
-      <section id="products" className={styles.section} style={{ scrollMarginTop: '80px' }}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionEyebrow}>Our Products</span>
-          <h2 className={styles.sectionTitle}>Trusted packaged water brands</h2>
-          <p className={styles.sectionSubtitle}>
-            We don&apos;t make our own water — we deliver quality-checked, sealed bottles from
-            brands you already trust. Order any quantity, priced by the box.
-          </p>
-        </div>
-        <div className={styles.productGrid}>
-          {BRANDS.map((brand) => {
-            const product = PRODUCTS[brand.code];
-            return (
-              <div className={styles.productCard} key={brand.code}>
-                <div className={styles.productImageWrap}>
-                  <Image
-                    src={brand.image}
-                    alt={`${brand.name} packaged drinking water, available for delivery via DRINK IT`}
-                    fill
-                    className={styles.productImage}
-                    sizes="(min-width: 640px) 50vw, 100vw"
-                  />
-                </div>
-                <div className={styles.productBody}>
-                  <h3 className={styles.productName}>{product.label} Bottles</h3>
-                  <p className={styles.productMeta}>{product.piecesPerBox} bottles per box</p>
-                  <div className={styles.productPriceRow}>
-                    <p className={styles.productPrice}>
-                      ₹{product.boxPrice} <span className={styles.productPriceUnit}>/ box</span>
-                    </p>
-                    <span className={styles.productPerBottle}>
-                      ₹{formatMoney(unitPrice(brand.code))} / bottle
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
       <section className={styles.howItWorksBand}>
         <div className={styles.section}>

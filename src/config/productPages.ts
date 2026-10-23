@@ -35,7 +35,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     brand: 'Detox',
     size: '1L',
     productCode: '1L',
-    image: '/images/detox-bottle-transparent.png',
+    image: '/images/Detox Pure Water Splash - 1L.png',
     catalogRetailerId: 'lk63ilai9x',
   },
   {
@@ -43,7 +43,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     brand: 'Detox',
     size: '500ml',
     productCode: '500ML',
-    image: '/images/detox-500ml.png',
+    image: '/images/detox-bottle-transparent - 500ml.png',
     catalogRetailerId: '9vwq63m36r',
   },
   {

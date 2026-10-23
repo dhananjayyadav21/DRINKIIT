@@ -142,7 +142,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {otherProducts.map((p) => {
               const otherBox = PRODUCTS[p.productCode];
               return (
-                <Link href={`/${p.slug}`} className={styles.otherCard} key={p.slug}>
+                <Link href={`/product/${p.slug}`} className={styles.otherCard} key={p.slug}>
                   <div className={styles.otherImageWrap}>
                     <Image
                       src={p.image}
