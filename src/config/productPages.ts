@@ -2,7 +2,7 @@ import { ProductCode } from './products';
 
 export interface ProductPage {
   slug: string;
-  brand: 'Puresy' | 'Detox';
+  brand: 'Puresy' | 'Detox' | 'Independence' | 'Kinley' | 'Bisleri';
   size: '500ml' | '1L';
   productCode: ProductCode;
   image: string;
@@ -45,6 +45,27 @@ export const PRODUCT_PAGES: ProductPage[] = [
     productCode: '500ML',
     image: '/images/detox-500ml.png',
     catalogRetailerId: '9vwq63m36r',
+  },
+  {
+    slug: 'indepenence1l',
+    brand: 'Independence',
+    size: '1L',
+    productCode: '1L',
+    image: '/images/independece - 1l bottle.jpg',
+  },
+  {
+    slug: 'kinley1l',
+    brand: 'Kinley',
+    size: '1L',
+    productCode: '1L',
+    image: '/images/Kinley - 1L.png',
+  },
+  {
+    slug: 'bisleri1l',
+    brand: 'Bisleri',
+    size: '1L',
+    productCode: '1L',
+    image: '/images/Bisleri - 1L .png',
   },
 ];
 
