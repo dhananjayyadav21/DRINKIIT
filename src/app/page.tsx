@@ -4,6 +4,7 @@ import styles from './home.module.css';
 import SiteNav from '@/components/SiteNav';
 import SiteFooter from '@/components/SiteFooter';
 import { env } from '@/config/env';
+import { PRODUCT_PAGES } from '@/config/productPages';
 
 function whatsappLink(prefill?: string): string {
   if (!env.business.whatsappNumber) return '/admin';
@@ -91,6 +92,42 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionEyebrow}>Our Products</span>
+          <h2 className={styles.sectionTitle}>Shop by brand</h2>
+          <p className={styles.sectionSubtitle}>
+            We don&apos;t make our own water — we deliver quality-checked, sealed bottles from
+            brands you already trust.
+          </p>
+        </div>
+        <div className={styles.productGrid}>
+          {PRODUCT_PAGES.slice(0, 3).map((page) => (
+            <Link href={`/product/${page.slug}`} className={styles.productCard} key={page.slug}>
+              <div className={styles.productImageWrap}>
+                <Image
+                  src={page.image}
+                  alt={`${page.brand} ${page.size} packaged drinking water, available for delivery via DRINK IT`}
+                  fill
+                  className={styles.productImage}
+                  sizes="(min-width: 900px) 33vw, (min-width: 640px) 50vw, 100vw"
+                />
+              </div>
+              <div className={styles.productBody}>
+                <h3 className={styles.productName}>
+                  {page.brand} {page.size}
+                </h3>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className={styles.viewAllWrap}>
+          <Link href="/products" className={styles.secondaryButton}>
+            View all products
+          </Link>
+        </div>
+      </section>
 
       <section className={styles.howItWorksBand}>
         <div className={styles.section}>

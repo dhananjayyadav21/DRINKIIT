@@ -268,6 +268,18 @@
   }
 }
 
+@media (min-width: 900px) {
+  .productGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.viewAllWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
 .productCard {
   display: block;
   position: relative;
