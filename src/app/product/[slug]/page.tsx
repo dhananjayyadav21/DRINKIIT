@@ -6,7 +6,7 @@ import styles from './product.module.css';
 import SiteNav from '@/components/SiteNav';
 import SiteFooter from '@/components/SiteFooter';
 import { env } from '@/config/env';
-import { PRODUCTS, boxTierTable } from '@/config/products';
+import { PRODUCTS } from '@/config/products';
 import { PRODUCT_PAGES, findProductPage, ProductPage } from '@/config/productPages';
 
 export function generateStaticParams() {
@@ -22,10 +22,9 @@ export async function generateMetadata({
   const product = findProductPage(slug);
   if (!product) return {};
 
-  const box = PRODUCTS[product.productCode];
   return {
     title: `${product.brand} ${product.size} Packaged Water – ${env.business.name}`,
-    description: `Order ${product.brand} ${product.size} packaged drinking water in bulk boxes, starting at ₹${box.boxPrice} per box (${box.piecesPerBox} pcs), delivered via WhatsApp by ${env.business.name}.`,
+    description: `Order ${product.brand} ${product.size} packaged drinking water in bulk boxes, delivered via WhatsApp by ${env.business.name}.`,
   };
 }
 
@@ -43,7 +42,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   if (!product) notFound();
 
   const box = PRODUCTS[product.productCode];
-  const tiers = boxTierTable(product.productCode);
   const otherProducts = PRODUCT_PAGES.filter((p) => p.slug !== product.slug);
 
   return (
@@ -77,11 +75,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               ordered on WhatsApp, delivered to your door.
             </p>
 
-            <div className={styles.priceRow}>
-              <span className={styles.sellPrice}>₹{box.boxPrice}</span>
-              <span className={styles.taxNote}>/ box ({box.piecesPerBox} pcs)</span>
-            </div>
-
             <ul className={styles.features}>
               {FEATURES.map((feature) => (
                 <li key={feature}>
@@ -110,32 +103,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        <div className={styles.pricingTable}>
-          <h2 className={styles.pricingTitle}>Bulk Pricing</h2>
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Boxes</th>
-                  <th>Pieces</th>
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tiers.map((row) => (
-                  <tr key={row.boxes}>
-                    <td>
-                      {row.boxes} Box{row.boxes > 1 ? 'es' : ''}
-                    </td>
-                    <td>{row.pieces} pcs</td>
-                    <td>₹{row.price.toLocaleString('en-IN')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         <div className={styles.otherProducts}>
           <h2 className={styles.otherProductsTitle}>Other products</h2>
           <div className={styles.otherGrid}>
@@ -157,7 +124,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                       {p.brand} {p.size}
                     </p>
                     <p className={styles.otherCardMeta}>{otherBox.piecesPerBox} pcs / box</p>
-                    <span className={styles.otherCardPrice}>₹{otherBox.boxPrice} / box</span>
                   </div>
                 </Link>
               );
