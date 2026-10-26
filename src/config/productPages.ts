@@ -20,7 +20,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     size: '1L',
     productCode: '1L',
     image: '/images/puresy-banner-gradient.png',
-    catalogRetailerId: 'yn3f58i2da',
+    catalogRetailerId: 'lk63ilai9x',
   },
   {
     slug: 'puresy500ml',
@@ -36,7 +36,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     size: '1L',
     productCode: '1L',
     image: '/images/Detox Pure Water Splash - 1L.png',
-    catalogRetailerId: 'lk63ilai9x',
+    catalogRetailerId: '9vwq63m36r',
   },
   {
     slug: 'detox500ml',
@@ -44,7 +44,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     size: '500ml',
     productCode: '500ML',
     image: '/images/detox-bottle-transparent - 500ml.png',
-    catalogRetailerId: '9vwq63m36r',
+    catalogRetailerId: 'yn3f58i2da',
   },
   {
     slug: 'indepenence1l',
@@ -52,6 +52,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     size: '1L',
     productCode: '1L',
     image: '/images/independece - 1l bottle.jpg',
+    catalogRetailerId: 'cizzhwstrq',
   },
   {
     slug: 'kinley1l',
@@ -59,6 +60,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     size: '1L',
     productCode: '1L',
     image: '/images/Kinley - 1L.png',
+    catalogRetailerId: 'kjntepsntc',
   },
   {
     slug: 'bisleri1l',
@@ -66,6 +68,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     size: '1L',
     productCode: '1L',
     image: '/images/Bisleri - 1L .png',
+    catalogRetailerId: 'syxeewuwf3',
   },
 ];
 
