@@ -267,3 +267,12 @@ export function sendOrderInProgress(to: string, order: Order): Promise<void> {
 export function sendOrderDelivered(to: string, order: Order): Promise<void> {
   return sendText(to, templates.orderDeliveredMessage(order));
 }
+
+// Heads-up to the business owner's own WhatsApp when a new order is
+// confirmed - separate from all the customer-facing sends above, and
+// controlled by its own env toggle so it can be turned off without touching
+// any other notification.
+export function sendNewOrderAlert(order: Order, customerName?: string | null): Promise<void> {
+  if (!env.adminNotify.enabled || !env.adminNotify.whatsappNumber) return Promise.resolve();
+  return sendText(env.adminNotify.whatsappNumber, templates.newOrderAlertMessage(order, customerName));
+}

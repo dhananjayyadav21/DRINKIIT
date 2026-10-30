@@ -54,6 +54,13 @@ export const env = {
     gstNumber: process.env.BUSINESS_GST_NUMBER || '',
   },
 
+  // Owner/admin WhatsApp alert for new orders - set ADMIN_NOTIFY_ENABLED=false
+  // to turn it off without removing the number.
+  adminNotify: {
+    enabled: (process.env.ADMIN_NOTIFY_ENABLED || 'true').toLowerCase() !== 'false',
+    whatsappNumber: process.env.ADMIN_NOTIFY_WHATSAPP_NUMBER,
+  },
+
   admin: {
     email: process.env.ADMIN_EMAIL as string,
     password: process.env.ADMIN_PASSWORD as string,

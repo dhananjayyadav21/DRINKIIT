@@ -308,6 +308,7 @@ async function handlePaymentChoice(customer: Customer, choice: 'COD' | 'PAY'): P
     await customerRepo.save(customer);
 
     await whatsapp.sendCodConfirmation(customer.waId, order);
+    await whatsapp.sendNewOrderAlert(order, customer.name);
     return;
   }
 
@@ -371,4 +372,5 @@ export async function markOrderPaid(orderId: string, paymentId?: string | null):
   }
 
   await whatsapp.sendPaidConfirmation(order.waId, order);
+  await whatsapp.sendNewOrderAlert(order, customer?.name);
 }

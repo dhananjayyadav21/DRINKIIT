@@ -173,6 +173,27 @@ export function orderInProgressMessage(order: Order): string {
   );
 }
 
+// Sent to the business owner's own WhatsApp (not the customer) the moment an
+// order is actually confirmed (COD chosen, or payment received) - a plain
+// heads-up, not a customer-facing template, so it skips the footer/branding.
+export function newOrderAlertMessage(order: Order, customerName?: string | null): string {
+  const paymentLine =
+    order.paymentMethod === 'COD' ? '💵 *Cash on Delivery*' : order.paymentMethod === 'ONLINE' ? '💳 *Paid Online*' : '';
+
+  return joinSections(
+    heading('New Order 🔔'),
+    [
+      `👤 *${customerName || 'Customer'}* (+${order.waId})`,
+      `🛒 *Order ID*: *${order.id}*`,
+      `🧾 *Total*: *₹${formatMoney(order.amount)}*`,
+      paymentLine,
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    orderSummary(order).split('\n\n').slice(1).join('\n\n')
+  );
+}
+
 export function orderDeliveredMessage(order: Order): string {
   return joinSections(
     heading('Order Delivered ✅'),
