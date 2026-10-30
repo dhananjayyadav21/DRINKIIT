@@ -4,7 +4,7 @@ import styles from './home.module.css';
 import SiteNav from '@/components/SiteNav';
 import SiteFooter from '@/components/SiteFooter';
 import { env } from '@/config/env';
-import { PRODUCT_PAGES } from '@/config/productPages';
+import { PRODUCT_LIST } from '@/config/products';
 
 function whatsappLink(prefill?: string): string {
   if (!env.business.whatsappNumber) return '/admin';
@@ -103,7 +103,7 @@ export default function Home() {
           </p>
         </div>
         <div className={styles.productGrid}>
-          {PRODUCT_PAGES.slice(0, 3).map((page) => (
+          {PRODUCT_LIST.slice(0, 3).map((page) => (
             <Link href={`/product/${page.slug}`} className={styles.productCard} key={page.slug}>
               <div className={styles.productImageWrap}>
                 <Image

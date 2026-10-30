@@ -1,5 +1,5 @@
 import { env } from '@/config/env';
-import { PRODUCTS, boxTierTable } from '@/config/products';
+import { ProductCode, PRODUCTS, PRODUCT_LIST, boxTierTable } from '@/config/products';
 import { Order } from '@/types/order';
 
 const DIVIDER = '──────────────────';
@@ -27,10 +27,10 @@ function orderSummary(order: Order, note?: string): string {
 
   const itemBlocks = order.items.map((item) => {
     const product = PRODUCTS[item.product];
-    const pieces = item.quantity * product.piecesPerBox;
+    const pieces = item.quantity * (product?.piecesPerBox || 0);
     const boxLabel = `Box${item.quantity > 1 ? 'es' : ''}`;
     return [
-      `🥤 *${product.label}* — ${item.quantity} ${boxLabel} (${pieces} pcs)`,
+      `🥤 *${product?.label || item.product}* — ${item.quantity} ${boxLabel} (${pieces} pcs)`,
       `🏷️ ₹${formatMoney(item.amount)}`,
     ].join('\n');
   });
@@ -50,7 +50,7 @@ function footer(): string {
   return joinSections(DIVIDER, `Thank you for choosing *${env.business.name}*! 💧`);
 }
 
-function catalogEntry(code: '1L' | '500ML'): string {
+function catalogEntry(code: ProductCode): string {
   const product = PRODUCTS[code];
   const tierLines = boxTierTable(code)
     .map(
@@ -74,8 +74,7 @@ export function welcomeMessage(name?: string | null): string {
 export function catalogMessage(): string {
   return joinSections(
     heading(`${env.business.name} – Price List 💧`),
-    catalogEntry('1L'),
-    catalogEntry('500ML'),
+    ...PRODUCT_LIST.map((product) => catalogEntry(product.code)),
     freeDeliveryLine(),
     '👉 *Tap "View catalog" below* to browse our products and add them to your cart.'
   );

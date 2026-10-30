@@ -5,7 +5,7 @@ import styles from '../home.module.css';
 import SiteNav from '@/components/SiteNav';
 import SiteFooter from '@/components/SiteFooter';
 import { env } from '@/config/env';
-import { PRODUCT_PAGES } from '@/config/productPages';
+import { PRODUCT_LIST } from '@/config/products';
 
 export const metadata: Metadata = {
   title: `Products – ${env.business.name}`,
@@ -26,7 +26,7 @@ export default function ProductsPage() {
           </p>
         </div>
         <div className={styles.productGrid}>
-          {PRODUCT_PAGES.map((page) => (
+          {PRODUCT_LIST.map((page) => (
             <Link href={`/product/${page.slug}`} className={styles.productCard} key={page.slug}>
               <div className={styles.productImageWrap}>
                 <Image

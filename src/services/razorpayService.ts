@@ -12,7 +12,7 @@ const razorpay = new Razorpay({
 
 export async function createPaymentLink(order: Order, customer: Customer) {
   const description = order.items
-    .map((item) => `${PRODUCTS[item.product].label} x ${item.quantity}`)
+    .map((item) => `${PRODUCTS[item.product]?.label || item.product} x ${item.quantity}`)
     .join(', ');
 
   const link = await razorpay.paymentLink.create({
