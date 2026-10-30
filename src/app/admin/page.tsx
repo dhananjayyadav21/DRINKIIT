@@ -23,6 +23,7 @@ export default async function AdminPage() {
     awaitingPayment: orders.filter((o) => o.status === 'AWAITING_PAYMENT').length,
     confirmed: orders.filter((o) => o.status === 'CONFIRMED').length,
     delivered: orders.filter((o) => o.status === 'DELIVERED').length,
+    cancelled: orders.filter((o) => o.status === 'CANCELLED').length,
   };
 
   return (
@@ -59,6 +60,10 @@ export default async function AdminPage() {
           <div className={styles.statCard}>
             <p className={styles.statLabel}>Delivered</p>
             <p className={styles.statValue}>{stats.delivered}</p>
+          </div>
+          <div className={styles.statCard}>
+            <p className={styles.statLabel}>Cancelled</p>
+            <p className={styles.statValue}>{stats.cancelled}</p>
           </div>
         </div>
 
