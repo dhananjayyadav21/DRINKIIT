@@ -8,9 +8,8 @@ import * as customerRepo from '@/data/customerRepository';
 import { PRODUCTS } from '@/config/products';
 import { env } from '@/config/env';
 import PrintButton from './PrintButton';
+import { calculateOrderTotals } from '@/services/pricing';
 import styles from './invoice.module.css';
-
-const GST_RATE = 0.18;
 
 function formatMoney(amount: number): string {
   return Number(amount).toFixed(2);
@@ -39,10 +38,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
       ? 'Online (Razorpay)'
       : 'Not selected yet';
 
-  const taxableAmount = order.amount + (order.deliveryFee || 0);
-  const cgst = taxableAmount * (GST_RATE / 2);
-  const sgst = taxableAmount * (GST_RATE / 2);
-  const grandTotal = taxableAmount + cgst + sgst;
+  const { cgst, sgst, total: grandTotal } = calculateOrderTotals(order);
 
   return (
     <div className={styles.page}>

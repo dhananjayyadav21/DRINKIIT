@@ -138,23 +138,25 @@ export function sendWelcome(to: string, name?: string | null): Promise<void> {
 
 export const catalogInteractiveEnabled = !!env.whatsapp.meta.catalogId;
 
-// Sends the price list as one message with a real "View catalog" button
-// attached (Meta's catalog_message), so the customer can tap straight into
-// the photo catalog and build a cart from there. Falls back to a plain-text
-// price list if no catalog is configured.
+// Sends the full price list as plain text, then (when a catalog is
+// configured) a short follow-up message with a real "View catalog" button
+// attached (Meta's catalog_message) so the customer can tap straight into
+// the photo catalog and build a cart from there. The price list has to be
+// its own message because catalog_message's body text has a ~1024-character
+// limit that our full per-SKU pricing blows past (Meta rejects it outright
+// with a 131009 error, not a silent truncation) - if that send ever fails
+// for some other reason, we still fall back to appending the button prompt
+// as plain text so nothing is silently dropped.
 export async function sendCatalog(to: string): Promise<void> {
-  const bodyText = templates.catalogMessage();
+  await sendText(to, templates.catalogMessage());
 
-  if (!catalogInteractiveEnabled) {
-    await sendText(to, bodyText);
-    return;
-  }
+  if (!catalogInteractiveEnabled) return;
 
   try {
-    await sendCatalogViaMeta(to, bodyText);
+    await sendCatalogViaMeta(to, templates.catalogButtonMessage());
   } catch (err) {
     console.error(`WhatsApp catalog send error (to ${to}):`, err instanceof Error ? err.message : err);
-    await sendText(to, bodyText);
+    await sendText(to, templates.catalogButtonMessage());
   }
 }
 

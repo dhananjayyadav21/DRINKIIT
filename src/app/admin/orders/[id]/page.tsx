@@ -9,9 +9,8 @@ import { PRODUCTS } from '@/config/products';
 import { OrderStatus } from '@/types/order';
 import { markDelivered, markPaid, setDeliveryFee } from '../../actions';
 import SubmitButton from '../../SubmitButton';
+import { calculateOrderTotals } from '@/services/pricing';
 import styles from '../../admin.module.css';
-
-const GST_RATE = 0.18;
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
   PENDING_VERIFICATION: styles.badgeGray,
@@ -46,10 +45,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const razorpay = order.razorpay || { paymentLinkId: null, paymentLinkUrl: null, paymentId: null };
   const isFinal = order.status === 'DELIVERED' || order.status === 'CANCELLED';
 
-  const taxableAmount = order.amount + (order.deliveryFee || 0);
-  const cgst = taxableAmount * (GST_RATE / 2);
-  const sgst = taxableAmount * (GST_RATE / 2);
-  const grandTotal = taxableAmount + cgst + sgst;
+  const { cgst, sgst, total: grandTotal } = calculateOrderTotals(order);
 
   // The stored address string includes a trailing "Phone: ..." line (captured
   // from the WhatsApp address form) - drop it here since the WhatsApp number

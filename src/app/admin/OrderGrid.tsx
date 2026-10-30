@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PRODUCTS } from '@/config/products';
 import { Order, OrderStatus } from '@/types/order';
+import { calculateOrderTotals } from '@/services/pricing';
 import styles from './admin.module.css';
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
@@ -89,6 +90,7 @@ export default function OrderGrid({ orders }: { orders: Order[] }) {
               .join(', ');
 
             const needsAction = order.status !== 'DELIVERED' && order.status !== 'CANCELLED';
+            const { total } = calculateOrderTotals(order);
 
             return (
               <Link key={order.id} href={`/admin/orders/${order.id}`} className={styles.orderCard}>
@@ -107,7 +109,7 @@ export default function OrderGrid({ orders }: { orders: Order[] }) {
                     <p className={styles.orderCardCustomer}>{order.waId}</p>
                     <p className={styles.orderCardDate}>{new Date(order.createdAt).toLocaleString()}</p>
                   </div>
-                  <p className={styles.orderCardAmount}>₹{order.amount}</p>
+                  <p className={styles.orderCardAmount}>₹{total.toFixed(2)}</p>
                 </div>
 
                 <div className={styles.orderCardFooter}>

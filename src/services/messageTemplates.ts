@@ -1,6 +1,7 @@
 import { env } from '@/config/env';
 import { ProductCode, PRODUCTS, PRODUCT_LIST, boxTierTable } from '@/config/products';
 import { Order } from '@/types/order';
+import { calculateOrderTotals } from './pricing';
 
 const DIVIDER = '──────────────────';
 
@@ -17,9 +18,10 @@ function heading(title: string): string {
 }
 
 function orderSummary(order: Order, note?: string): string {
+  const { total } = calculateOrderTotals(order);
   const metaLines = [
     `🛒 *Order ID*: *${order.id}*`,
-    `🧾 *Total*: *₹${formatMoney(order.amount)}*${note ? ` _(${note})_` : ''}`,
+    `🧾 *Total*: *₹${formatMoney(total)}* _(incl. GST)_${note ? ` _(${note})_` : ''}`,
   ];
   if (order.razorpay.paymentId) {
     metaLines.push(`🔖 *Payment ID*: *${order.razorpay.paymentId}*`);
@@ -78,6 +80,15 @@ export function catalogMessage(): string {
     freeDeliveryLine(),
     '👉 *Tap "View catalog" below* to browse our products and add them to your cart.'
   );
+}
+
+// Meta's catalog_message has a hard ~1024-character limit on its body text,
+// which the full price list (now 7 SKUs x 9 box tiers) blows well past -
+// that's an API error (#131009), not a cosmetic overflow. So the detailed
+// price list goes out as its own plain-text message first, and this is just
+// the short intro attached to the "View catalog" button itself.
+export function catalogButtonMessage(): string {
+  return '👉 *Tap "View catalog" below* to browse our products and add them to your cart.';
 }
 
 export function helpMessage(): string {
@@ -177,6 +188,7 @@ export function orderInProgressMessage(order: Order): string {
 // order is actually confirmed (COD chosen, or payment received) - a plain
 // heads-up, not a customer-facing template, so it skips the footer/branding.
 export function newOrderAlertMessage(order: Order, customerName?: string | null): string {
+  const { total } = calculateOrderTotals(order);
   const paymentLine =
     order.paymentMethod === 'COD' ? '💵 *Cash on Delivery*' : order.paymentMethod === 'ONLINE' ? '💳 *Paid Online*' : '';
 
@@ -185,7 +197,7 @@ export function newOrderAlertMessage(order: Order, customerName?: string | null)
     [
       `👤 *${customerName || 'Customer'}* (+${order.waId})`,
       `🛒 *Order ID*: *${order.id}*`,
-      `🧾 *Total*: *₹${formatMoney(order.amount)}*`,
+      `🧾 *Total*: *₹${formatMoney(total)}* _(incl. GST)_`,
       paymentLine,
     ]
       .filter(Boolean)
