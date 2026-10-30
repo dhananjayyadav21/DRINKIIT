@@ -24,14 +24,26 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   CANCELLED: 'Cancelled',
 };
 
+const STATUS_FILTERS: Array<{ key: OrderStatus | 'ALL'; label: string }> = [
+  { key: 'ALL', label: 'All' },
+  { key: 'AWAITING_PAYMENT', label: 'Awaiting Payment' },
+  { key: 'CONFIRMED', label: 'Confirmed' },
+  { key: 'DELIVERED', label: 'Delivered' },
+  { key: 'CANCELLED', label: 'Cancelled' },
+];
+
 export default function OrderGrid({ orders }: { orders: Order[] }) {
   const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return orders;
-    return orders.filter((o) => o.id.toLowerCase().includes(q));
-  }, [orders, query]);
+    return orders.filter((o) => {
+      const matchesQuery = !q || o.id.toLowerCase().includes(q);
+      const matchesStatus = statusFilter === 'ALL' || o.status === statusFilter;
+      return matchesQuery && matchesStatus;
+    });
+  }, [orders, query, statusFilter]);
 
   return (
     <>
@@ -50,12 +62,25 @@ export default function OrderGrid({ orders }: { orders: Order[] }) {
         )}
       </div>
 
+      <div className={styles.statusFilterBar}>
+        {STATUS_FILTERS.map((filter) => (
+          <button
+            key={filter.key}
+            type="button"
+            onClick={() => setStatusFilter(filter.key)}
+            className={`${styles.statusFilterChip} ${statusFilter === filter.key ? styles.statusFilterChipActive : ''}`}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
       {orders.length === 0 ? (
         <div className={styles.emptyStateCard}>
           No orders yet — they will show up here as customers order on WhatsApp.
         </div>
       ) : filtered.length === 0 ? (
-        <div className={styles.emptyStateCard}>No orders match “{query}”.</div>
+        <div className={styles.emptyStateCard}>No orders match the current filters.</div>
       ) : (
         <div className={styles.orderGrid}>
           {filtered.map((order) => {
