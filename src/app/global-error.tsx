@@ -12,7 +12,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="en">
-      <body style={{ margin: 0, background: '#0a0b10' }}>
+      <body style={{ margin: 0, background: '#f7f9fb' }}>
         <main
           style={{
             minHeight: '100vh',
@@ -21,27 +21,37 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
             justifyContent: 'center',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             padding: 24,
-            color: '#f2f3f5',
+            color: '#12233e',
             textAlign: 'center',
           }}
         >
-          <div style={{ maxWidth: 380 }}>
+          <div
+            style={{
+              maxWidth: 380,
+              background: '#ffffff',
+              border: '1px solid #e5e9ee',
+              borderRadius: 16,
+              boxShadow: '0 2px 10px rgba(18, 35, 62, 0.04)',
+              padding: '36px 32px',
+            }}
+          >
             <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>Something went wrong</h1>
-            <p style={{ fontSize: 14, color: '#8b8fa3', margin: '0 0 24px', lineHeight: 1.6 }}>
+            <h1 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 8px', color: '#12233e' }}>Something went wrong</h1>
+            <p style={{ fontSize: 14, color: '#6b7686', margin: '0 0 24px', lineHeight: 1.6 }}>
               The app hit an unexpected error. It has been logged - please try again.
             </p>
             <button
               onClick={() => reset()}
               style={{
                 padding: '11px 24px',
-                borderRadius: 9,
+                borderRadius: 8,
                 border: 'none',
-                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                background: '#0f6e94',
                 color: '#fff',
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(15, 110, 148, 0.25)',
               }}
             >
               Try again

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { login } from '../actions';
 import PasswordField from './PasswordField';
 import SubmitButton from './SubmitButton';
@@ -13,7 +14,7 @@ export default async function LoginPage({
   return (
     <main className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.logo}>🥤</div>
+        <Image src="/images/logo.jpg" alt="DRINK IT" width={52} height={52} className={styles.logo} />
         <h1 className={styles.title}>DRINK IT Admin</h1>
         <p className={styles.subtitle}>Sign in to manage orders</p>
 

@@ -46,7 +46,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className={styles.page}>
-      <div className={styles.container}>
+      <div className={styles.headerBar}>
         <div className={styles.header}>
           <div className={styles.brand}>
             <Image src="/images/logo.jpg" alt="DRINK IT" width={44} height={44} className={styles.logo} />
@@ -59,169 +59,175 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             ← Back to orders
           </Link>
         </div>
+      </div>
 
+      <div className={styles.container}>
         <div className={styles.detailGrid}>
-          <div className={styles.detailCard}>
-            <div className={styles.detailCardHeader}>
-              <h2 className={styles.detailCardTitle}>Order Items</h2>
-              <span className={`${styles.badge} ${STATUS_BADGE[order.status]}`}>
-                <span className={styles.dot} />
-                {STATUS_LABEL[order.status]}
-              </span>
-            </div>
+          <div className={styles.detailColumn}>
+            <div className={styles.detailCard}>
+              <div className={styles.detailCardHeader}>
+                <h2 className={styles.detailCardTitle}>Order Items</h2>
+                <span className={`${styles.badge} ${STATUS_BADGE[order.status]}`}>
+                  <span className={styles.dot} />
+                  {STATUS_LABEL[order.status]}
+                </span>
+              </div>
 
-            <div className={styles.itemsList}>
-              {(order.items || []).map((item, i) => {
-                const product = PRODUCTS[item.product];
-                const pieces = item.quantity * (product?.piecesPerBox || 0);
-                return (
-                  <div key={i} className={styles.itemRow}>
-                    <div>
-                      <p className={styles.itemName}>{product?.label || item.product}</p>
-                      <p className={styles.itemMeta}>
-                        {item.quantity} Box{item.quantity > 1 ? 'es' : ''} ({pieces} pcs)
-                      </p>
+              <div className={styles.itemsList}>
+                {(order.items || []).map((item, i) => {
+                  const product = PRODUCTS[item.product];
+                  const pieces = item.quantity * (product?.piecesPerBox || 0);
+                  return (
+                    <div key={i} className={styles.itemRow}>
+                      <div>
+                        <p className={styles.itemName}>{product?.label || item.product}</p>
+                        <p className={styles.itemMeta}>
+                          {item.quantity} Box{item.quantity > 1 ? 'es' : ''} ({pieces} pcs)
+                        </p>
+                      </div>
+                      <p className={styles.itemAmount}>₹{item.amount}</p>
                     </div>
-                    <p className={styles.itemAmount}>₹{item.amount}</p>
+                  );
+                })}
+              </div>
+
+              {order.deliveryFee ? (
+                <>
+                  <div className={styles.subtotalRow}>
+                    <span>Items Subtotal</span>
+                    <span>₹{order.amount}</span>
                   </div>
-                );
-              })}
+                  <div className={styles.subtotalRow}>
+                    <span>Delivery Fee</span>
+                    <span>₹{order.deliveryFee.toFixed(2)}</span>
+                  </div>
+                </>
+              ) : null}
+
+              <div className={styles.totalRow}>
+                <span>Total</span>
+                <span className={styles.totalAmount}>₹{(order.amount + (order.deliveryFee || 0)).toFixed(2)}</span>
+              </div>
             </div>
 
-            {order.deliveryFee ? (
-              <>
-                <div className={styles.subtotalRow}>
-                  <span>Items Subtotal</span>
-                  <span>₹{order.amount}</span>
-                </div>
-                <div className={styles.subtotalRow}>
-                  <span>Delivery Fee</span>
-                  <span>₹{order.deliveryFee.toFixed(2)}</span>
-                </div>
-              </>
-            ) : null}
-
-            <div className={styles.totalRow}>
-              <span>Total</span>
-              <span className={styles.totalAmount}>₹{(order.amount + (order.deliveryFee || 0)).toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className={styles.detailCard}>
-            <h2 className={styles.detailCardTitle}>Customer</h2>
-            <dl className={styles.detailList}>
-              <div>
-                <dt>Name</dt>
-                <dd>{customer?.name || '—'}</dd>
-              </div>
-              <div>
-                <dt>WhatsApp Number</dt>
-                <dd>{order.waId}</dd>
-              </div>
-              <div>
-                <dt>Delivery Address</dt>
-                <dd className={styles.addressText}>{order.address || 'Not provided yet'}</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className={styles.detailCard}>
-            <h2 className={styles.detailCardTitle}>Payment</h2>
-            <dl className={styles.detailList}>
-              <div>
-                <dt>Method</dt>
-                <dd>{order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'ONLINE' ? 'Online (Razorpay)' : '—'}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd>
-                  <span className={`${styles.badge} ${order.paid ? styles.badgeGreen : styles.badgeOrange}`}>
-                    {order.paid ? 'Paid' : 'Unpaid'}
-                  </span>
-                </dd>
-              </div>
-              {razorpay.paymentId && (
+            <div className={styles.detailCard}>
+              <h2 className={styles.detailCardTitle}>Payment</h2>
+              <dl className={styles.detailList}>
                 <div>
-                  <dt>Payment ID</dt>
-                  <dd className={styles.mono}>{razorpay.paymentId}</dd>
+                  <dt>Method</dt>
+                  <dd>{order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'ONLINE' ? 'Online (Razorpay)' : '—'}</dd>
                 </div>
-              )}
-              {razorpay.paymentLinkId && !order.paid && (
                 <div>
-                  <dt>Payment Link</dt>
-                  <dd className={styles.mono}>{razorpay.paymentLinkId}</dd>
+                  <dt>Status</dt>
+                  <dd>
+                    <span className={`${styles.badge} ${order.paid ? styles.badgeGreen : styles.badgeOrange}`}>
+                      {order.paid ? 'Paid' : 'Unpaid'}
+                    </span>
+                  </dd>
                 </div>
-              )}
-            </dl>
-
-            {order.paymentMethod === 'COD' && (
-              <div className={styles.deliveryFeeSection}>
-                <p className={styles.deliveryFeeLabel}>
-                  Delivery Fee <span className={styles.optionalTag}>optional</span>
-                </p>
-                <p className={styles.deliveryFeeHint}>
-                  Add a charge for this delivery (e.g. outside the free-delivery radius). Leave blank for free delivery.
-                </p>
-                <form action={setDeliveryFee.bind(null, order.id)} className={styles.deliveryFeeForm}>
-                  <span className={styles.deliveryFeePrefix}>₹</span>
-                  <input
-                    type="number"
-                    name="deliveryFee"
-                    min="0"
-                    step="0.01"
-                    defaultValue={order.deliveryFee ?? ''}
-                    placeholder="0.00"
-                    className={styles.deliveryFeeInput}
-                  />
-                  <SubmitButton pendingLabel="Saving…" className={styles.deliveryFeeButton}>
-                    {order.deliveryFee != null ? 'Update' : 'Add Fee'}
-                  </SubmitButton>
-                </form>
-                {order.deliveryFee != null && (
-                  <p className={styles.deliveryFeeCurrent}>Current fee: ₹{order.deliveryFee.toFixed(2)}</p>
+                {razorpay.paymentId && (
+                  <div>
+                    <dt>Payment ID</dt>
+                    <dd className={styles.mono}>{razorpay.paymentId}</dd>
+                  </div>
                 )}
-              </div>
-            )}
+                {razorpay.paymentLinkId && !order.paid && (
+                  <div>
+                    <dt>Payment Link</dt>
+                    <dd className={styles.mono}>{razorpay.paymentLinkId}</dd>
+                  </div>
+                )}
+              </dl>
+
+              {order.paymentMethod === 'COD' && (
+                <div className={styles.deliveryFeeSection}>
+                  <p className={styles.deliveryFeeLabel}>
+                    Delivery Fee <span className={styles.optionalTag}>optional</span>
+                  </p>
+                  <p className={styles.deliveryFeeHint}>
+                    Add a charge for this delivery (e.g. outside the free-delivery radius). Leave blank for free delivery.
+                  </p>
+                  <form action={setDeliveryFee.bind(null, order.id)} className={styles.deliveryFeeForm}>
+                    <span className={styles.deliveryFeePrefix}>₹</span>
+                    <input
+                      type="number"
+                      name="deliveryFee"
+                      min="0"
+                      step="0.01"
+                      defaultValue={order.deliveryFee ?? ''}
+                      placeholder="0.00"
+                      className={styles.deliveryFeeInput}
+                    />
+                    <SubmitButton pendingLabel="Saving…" className={styles.deliveryFeeButton}>
+                      {order.deliveryFee != null ? 'Update' : 'Add Fee'}
+                    </SubmitButton>
+                  </form>
+                  {order.deliveryFee != null && (
+                    <p className={styles.deliveryFeeCurrent}>Current fee: ₹{order.deliveryFee.toFixed(2)}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className={styles.detailCard}>
-            <h2 className={styles.detailCardTitle}>Actions</h2>
-            <div className={styles.actionsStack}>
-              <Link href={`/admin/orders/${order.id}/invoice`} target="_blank" className={styles.secondaryActionButton}>
-                <svg viewBox="0 0 20 20" className={styles.inlineIcon} fill="none" aria-hidden="true">
-                  <path
-                    d="M6 2.5h5.5L15 6v11.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                    strokeLinejoin="round"
-                  />
-                  <path d="M11.5 2.5V6H15" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                  <path d="M7.5 10.5h5M7.5 13h5M7.5 15.5h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                </svg>
-                Download Invoice
-              </Link>
+          <div className={styles.detailColumn}>
+            <div className={styles.detailCard}>
+              <h2 className={styles.detailCardTitle}>Customer</h2>
+              <dl className={styles.detailList}>
+                <div>
+                  <dt>Name</dt>
+                  <dd>{customer?.name || '—'}</dd>
+                </div>
+                <div>
+                  <dt>WhatsApp Number</dt>
+                  <dd>{order.waId}</dd>
+                </div>
+                <div>
+                  <dt>Delivery Address</dt>
+                  <dd className={styles.addressText}>{order.address || 'Not provided yet'}</dd>
+                </div>
+              </dl>
+            </div>
 
-              {!isFinal && !order.paid && (
-                <form action={markPaid.bind(null, order.id)}>
-                  <SubmitButton pendingLabel="Marking as paid…" className={styles.actionButton} light>
-                    Mark as Paid
-                  </SubmitButton>
-                </form>
-              )}
+            <div className={styles.detailCard}>
+              <h2 className={styles.detailCardTitle}>Actions</h2>
+              <div className={styles.actionsStack}>
+                <Link href={`/admin/orders/${order.id}/invoice`} target="_blank" className={styles.secondaryActionButton}>
+                  <svg viewBox="0 0 20 20" className={styles.inlineIcon} fill="none" aria-hidden="true">
+                    <path
+                      d="M6 2.5h5.5L15 6v11.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"
+                      stroke="currentColor"
+                      strokeWidth="1.3"
+                      strokeLinejoin="round"
+                    />
+                    <path d="M11.5 2.5V6H15" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                    <path d="M7.5 10.5h5M7.5 13h5M7.5 15.5h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
+                  Download Invoice
+                </Link>
 
-              {!isFinal && order.paid && (
-                <form action={markDelivered.bind(null, order.id)}>
-                  <SubmitButton pendingLabel="Marking as delivered…" className={styles.actionButton} light>
-                    Mark as Delivered
-                  </SubmitButton>
-                </form>
-              )}
+                {!isFinal && !order.paid && (
+                  <form action={markPaid.bind(null, order.id)}>
+                    <SubmitButton pendingLabel="Marking as paid…" className={styles.actionButton} light>
+                      Mark as Paid
+                    </SubmitButton>
+                  </form>
+                )}
 
-              {!isFinal && !order.paid && (
-                <p className={styles.actionHint}>Mark the order paid before it can be marked delivered.</p>
-              )}
+                {!isFinal && order.paid && (
+                  <form action={markDelivered.bind(null, order.id)}>
+                    <SubmitButton pendingLabel="Marking as delivered…" className={styles.actionButton} light>
+                      Mark as Delivered
+                    </SubmitButton>
+                  </form>
+                )}
 
-              {isFinal && <p className={styles.actionHint}>This order is {STATUS_LABEL[order.status].toLowerCase()}.</p>}
+                {!isFinal && !order.paid && (
+                  <p className={styles.actionHint}>Mark the order paid before it can be marked delivered.</p>
+                )}
+
+                {isFinal && <p className={styles.actionHint}>This order is {STATUS_LABEL[order.status].toLowerCase()}.</p>}
+              </div>
             </div>
           </div>
         </div>

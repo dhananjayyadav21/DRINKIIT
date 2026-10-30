@@ -8,24 +8,38 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 28px 16px 48px;
+  padding: 24px 16px 48px;
 }
 
 @media (min-width: 640px) {
   .container {
-    padding: 36px 28px 56px;
+    padding: 32px 28px 56px;
   }
 }
 
+.headerBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f7f9fb;
+  border-bottom: 1px solid #e5e9ee;
+}
+
 .header {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e9ee;
   gap: 16px;
   flex-wrap: wrap;
+  padding: 18px 16px;
+}
+
+@media (min-width: 640px) {
+  .header {
+    padding: 20px 28px;
+  }
 }
 
 .brand {
@@ -77,6 +91,18 @@
   border-color: #b9c4d0;
 }
 
+.logoutButton:focus-visible,
+.actionButton:focus-visible,
+.secondaryActionButton:focus-visible,
+.orderCard:focus-visible,
+.statusFilterChip:focus-visible,
+.searchInput:focus-visible,
+.deliveryFeeInput:focus-visible,
+.deliveryFeeButton:focus-visible {
+  outline: 2px solid #0f6e94;
+  outline-offset: 2px;
+}
+
 .logoutButton:disabled {
   cursor: not-allowed;
   opacity: 0.7;
@@ -101,6 +127,54 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #eef1f4 25%, #f6f8fa 37%, #eef1f4 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.skeletonLogo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.skeletonTitle {
+  width: 160px;
+  height: 18px;
+  margin-bottom: 6px;
+}
+
+.skeletonSubtitle {
+  width: 200px;
+  height: 12px;
+}
+
+.skeletonLabel {
+  width: 90px;
+  height: 11px;
+  margin-bottom: 12px;
+}
+
+.skeletonValue {
+  width: 48px;
+  height: 26px;
+}
+
+.skeletonLine {
+  height: 12px;
 }
 
 .statsGrid {
@@ -415,6 +489,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+  align-items: start;
 }
 
 @media (min-width: 900px) {
@@ -423,12 +498,23 @@
   }
 }
 
+.detailColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .detailCard {
   background: #ffffff;
   border: 1px solid #e5e9ee;
   border-radius: 16px;
   padding: 22px 24px;
   box-shadow: 0 2px 10px rgba(18, 35, 62, 0.04);
+  transition: box-shadow 0.2s;
+}
+
+.detailCard:hover {
+  box-shadow: 0 8px 22px rgba(18, 35, 62, 0.07);
 }
 
 .detailCardHeader {

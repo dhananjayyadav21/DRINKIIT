@@ -28,7 +28,7 @@ export default async function AdminPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.container}>
+      <div className={styles.headerBar}>
         <div className={styles.header}>
           <div className={styles.brand}>
             <Image src="/images/logo.jpg" alt="DRINK IT" width={44} height={44} className={styles.logo} />
@@ -43,7 +43,9 @@ export default async function AdminPage() {
             </SubmitButton>
           </form>
         </div>
+      </div>
 
+      <div className={styles.container}>
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <p className={styles.statLabel}>Total Orders</p>
