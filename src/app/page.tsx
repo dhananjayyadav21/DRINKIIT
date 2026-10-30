@@ -72,7 +72,7 @@ export default function Home() {
           <div className={styles.heroVisual}>
             <div className={styles.heroImageFrame}>
               <Image
-                src="/images/detox-bottle-transparent - 500ml.png"
+                src="/images/detox-bottle-transparent - 500ml.webp"
                 alt="Packaged drinking water bottle delivered by DRINK IT"
                 fill
                 className={styles.heroImage}

@@ -11,6 +11,8 @@ import { markDelivered, markPaid, setDeliveryFee } from '../../actions';
 import SubmitButton from '../../SubmitButton';
 import styles from '../../admin.module.css';
 
+const GST_RATE = 0.18;
+
 const STATUS_BADGE: Record<OrderStatus, string> = {
   PENDING_VERIFICATION: styles.badgeGray,
   VERIFIED: styles.badgeBlue,
@@ -43,6 +45,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const customer = await customerRepo.findById(order.customer);
   const razorpay = order.razorpay || { paymentLinkId: null, paymentLinkUrl: null, paymentId: null };
   const isFinal = order.status === 'DELIVERED' || order.status === 'CANCELLED';
+
+  const taxableAmount = order.amount + (order.deliveryFee || 0);
+  const cgst = taxableAmount * (GST_RATE / 2);
+  const sgst = taxableAmount * (GST_RATE / 2);
+  const grandTotal = taxableAmount + cgst + sgst;
 
   return (
     <div className={styles.page}>
@@ -104,26 +111,32 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 </>
               ) : null}
 
+              <div className={styles.subtotalRow}>
+                <span>CGST (9%)</span>
+                <span>₹{cgst.toFixed(2)}</span>
+              </div>
+              <div className={styles.subtotalRow}>
+                <span>SGST (9%)</span>
+                <span>₹{sgst.toFixed(2)}</span>
+              </div>
+
               <div className={styles.totalRow}>
                 <span>Total</span>
-                <span className={styles.totalAmount}>₹{(order.amount + (order.deliveryFee || 0)).toFixed(2)}</span>
+                <span className={styles.totalAmount}>₹{grandTotal.toFixed(2)}</span>
               </div>
             </div>
 
             <div className={styles.detailCard}>
-              <h2 className={styles.detailCardTitle}>Payment</h2>
+              <div className={styles.detailCardHeader}>
+                <h2 className={styles.detailCardTitle}>Payment</h2>
+                <span className={`${styles.badge} ${order.paid ? styles.badgeGreen : styles.badgeOrange}`}>
+                  {order.paid ? 'Paid' : 'Unpaid'}
+                </span>
+              </div>
               <dl className={styles.detailList}>
                 <div>
                   <dt>Method</dt>
                   <dd>{order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'ONLINE' ? 'Online (Razorpay)' : '—'}</dd>
-                </div>
-                <div>
-                  <dt>Status</dt>
-                  <dd>
-                    <span className={`${styles.badge} ${order.paid ? styles.badgeGreen : styles.badgeOrange}`}>
-                      {order.paid ? 'Paid' : 'Unpaid'}
-                    </span>
-                  </dd>
                 </div>
                 {razorpay.paymentId && (
                   <div>
@@ -180,11 +193,41 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <div>
                   <dt>WhatsApp Number</dt>
-                  <dd>{order.waId}</dd>
+                  <dd>
+                    <a href={`https://wa.me/${order.waId}`} target="_blank" rel="noopener noreferrer" className={styles.whatsappLink}>
+                      <svg viewBox="0 0 20 20" className={styles.inlineIcon} fill="none" aria-hidden="true">
+                        <path
+                          d="M6.1 3.5h2l1 3-1.6 1.1a8 8 0 0 0 4.9 4.9l1.1-1.6 3 1v2a1.3 1.3 0 0 1-1.4 1.3A12.5 12.5 0 0 1 4.8 4.9a1.3 1.3 0 0 1 1.3-1.4Z"
+                          stroke="currentColor"
+                          strokeWidth="1.3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      +91 {order.waId}
+                    </a>
+                  </dd>
                 </div>
                 <div>
                   <dt>Delivery Address</dt>
-                  <dd className={styles.addressText}>{order.address || 'Not provided yet'}</dd>
+                  <dd>
+                    {order.address ? (
+                      <span className={styles.addressText}>
+                        <svg viewBox="0 0 20 20" className={styles.inlineIcon} fill="none" aria-hidden="true">
+                          <path
+                            d="M10 18s6-5.2 6-9.6A6 6 0 0 0 4 8.4C4 12.8 10 18 10 18Z"
+                            stroke="currentColor"
+                            strokeWidth="1.3"
+                            strokeLinejoin="round"
+                          />
+                          <circle cx="10" cy="8.2" r="2" stroke="currentColor" strokeWidth="1.3" />
+                        </svg>
+                        <span>{order.address}</span>
+                      </span>
+                    ) : (
+                      <span className={styles.addressMissing}>Not provided yet</span>
+                    )}
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -192,20 +235,6 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <div className={styles.detailCard}>
               <h2 className={styles.detailCardTitle}>Actions</h2>
               <div className={styles.actionsStack}>
-                <Link href={`/admin/orders/${order.id}/invoice`} target="_blank" className={styles.secondaryActionButton}>
-                  <svg viewBox="0 0 20 20" className={styles.inlineIcon} fill="none" aria-hidden="true">
-                    <path
-                      d="M6 2.5h5.5L15 6v11.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"
-                      stroke="currentColor"
-                      strokeWidth="1.3"
-                      strokeLinejoin="round"
-                    />
-                    <path d="M11.5 2.5V6H15" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                    <path d="M7.5 10.5h5M7.5 13h5M7.5 15.5h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                  </svg>
-                  Download Invoice
-                </Link>
-
                 {!isFinal && !order.paid && (
                   <form action={markPaid.bind(null, order.id)}>
                     <SubmitButton pendingLabel="Marking as paid…" className={styles.actionButton} light>
@@ -221,6 +250,20 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     </SubmitButton>
                   </form>
                 )}
+
+                <Link href={`/admin/orders/${order.id}/invoice`} target="_blank" className={styles.secondaryActionButton}>
+                  <svg viewBox="0 0 20 20" className={styles.inlineIcon} fill="none" aria-hidden="true">
+                    <path
+                      d="M6 2.5h5.5L15 6v11.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"
+                      stroke="currentColor"
+                      strokeWidth="1.3"
+                      strokeLinejoin="round"
+                    />
+                    <path d="M11.5 2.5V6H15" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                    <path d="M7.5 10.5h5M7.5 13h5M7.5 15.5h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
+                  Download Invoice
+                </Link>
 
                 {!isFinal && !order.paid && (
                   <p className={styles.actionHint}>Mark the order paid before it can be marked delivered.</p>

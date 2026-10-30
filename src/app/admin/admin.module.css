@@ -627,8 +627,41 @@
 }
 
 .addressText {
-  white-space: pre-line;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   line-height: 1.5;
+}
+
+.addressText span {
+  white-space: pre-line;
+}
+
+.addressText .inlineIcon {
+  margin-top: 2px;
+  color: #0f6e94;
+}
+
+.addressMissing {
+  color: #97a1ae;
+  font-style: italic;
+}
+
+.whatsappLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #0f6e94;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.whatsappLink:hover {
+  text-decoration: underline;
+}
+
+.whatsappLink .inlineIcon {
+  color: #0f6e94;
 }
 
 .actionsStack {
