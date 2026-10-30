@@ -51,6 +51,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const sgst = taxableAmount * (GST_RATE / 2);
   const grandTotal = taxableAmount + cgst + sgst;
 
+  // The stored address string includes a trailing "Phone: ..." line (captured
+  // from the WhatsApp address form) - drop it here since the WhatsApp number
+  // is already shown as its own field above.
+  const addressLines = order.address?.split('\n').filter((line) => !line.startsWith('Phone:')) || [];
+
   return (
     <div className={styles.page}>
       <div className={styles.headerBar}>
@@ -98,26 +103,34 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 })}
               </div>
 
-              {order.deliveryFee ? (
-                <>
-                  <div className={styles.subtotalRow}>
-                    <span>Items Subtotal</span>
-                    <span>₹{order.amount}</span>
-                  </div>
-                  <div className={styles.subtotalRow}>
-                    <span>Delivery Fee</span>
-                    <span>₹{order.deliveryFee.toFixed(2)}</span>
-                  </div>
-                </>
-              ) : null}
+              <div className={styles.subtotalsBlock}>
+                {order.deliveryFee ? (
+                  <>
+                    <div className={styles.subtotalRow}>
+                      <span>Items Subtotal</span>
+                      <span>₹{order.amount}</span>
+                    </div>
+                    <div className={styles.subtotalRow}>
+                      <span>Delivery Fee</span>
+                      <span>₹{order.deliveryFee.toFixed(2)}</span>
+                    </div>
+                  </>
+                ) : null}
 
-              <div className={styles.subtotalRow}>
-                <span>CGST (9%)</span>
-                <span>₹{cgst.toFixed(2)}</span>
-              </div>
-              <div className={styles.subtotalRow}>
-                <span>SGST (9%)</span>
-                <span>₹{sgst.toFixed(2)}</span>
+                <div className={styles.taxDivider} />
+
+                <div className={styles.subtotalRow}>
+                  <span>
+                    CGST <span className={styles.taxRate}>@ 9%</span>
+                  </span>
+                  <span>₹{cgst.toFixed(2)}</span>
+                </div>
+                <div className={styles.subtotalRow}>
+                  <span>
+                    SGST <span className={styles.taxRate}>@ 9%</span>
+                  </span>
+                  <span>₹{sgst.toFixed(2)}</span>
+                </div>
               </div>
 
               <div className={styles.totalRow}>
@@ -161,16 +174,18 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     Add a charge for this delivery (e.g. outside the free-delivery radius). Leave blank for free delivery.
                   </p>
                   <form action={setDeliveryFee.bind(null, order.id)} className={styles.deliveryFeeForm}>
-                    <span className={styles.deliveryFeePrefix}>₹</span>
-                    <input
-                      type="number"
-                      name="deliveryFee"
-                      min="0"
-                      step="0.01"
-                      defaultValue={order.deliveryFee ?? ''}
-                      placeholder="0.00"
-                      className={styles.deliveryFeeInput}
-                    />
+                    <div className={styles.deliveryFeeInputWrap}>
+                      <span className={styles.deliveryFeePrefix}>₹</span>
+                      <input
+                        type="number"
+                        name="deliveryFee"
+                        min="0"
+                        step="0.01"
+                        defaultValue={order.deliveryFee ?? ''}
+                        placeholder="0.00"
+                        className={styles.deliveryFeeInput}
+                      />
+                    </div>
                     <SubmitButton pendingLabel="Saving…" className={styles.deliveryFeeButton}>
                       {order.deliveryFee != null ? 'Update' : 'Add Fee'}
                     </SubmitButton>
@@ -211,7 +226,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <div>
                   <dt>Delivery Address</dt>
                   <dd>
-                    {order.address ? (
+                    {addressLines.length > 0 ? (
                       <span className={styles.addressText}>
                         <svg viewBox="0 0 20 20" className={styles.inlineIcon} fill="none" aria-hidden="true">
                           <path
@@ -222,7 +237,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                           />
                           <circle cx="10" cy="8.2" r="2" stroke="currentColor" strokeWidth="1.3" />
                         </svg>
-                        <span>{order.address}</span>
+                        <span>
+                          {addressLines.map((line, i) => (
+                            <span key={i} className={styles.addressLine}>
+                              {line}
+                            </span>
+                          ))}
+                        </span>
                       </span>
                     ) : (
                       <span className={styles.addressMissing}>Not provided yet</span>

@@ -579,13 +579,29 @@
   white-space: nowrap;
 }
 
+.subtotalsBlock {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
 .subtotalRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 12.5px;
   color: #6b7686;
-  padding: 2px 0;
+  padding: 4px 0;
+}
+
+.taxRate {
+  color: #b3bcc7;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.taxDivider {
+  border-top: 1px dashed #e5e9ee;
+  margin: 6px 0;
 }
 
 .totalRow {
@@ -633,8 +649,8 @@
   line-height: 1.5;
 }
 
-.addressText span {
-  white-space: pre-line;
+.addressLine {
+  display: block;
 }
 
 .addressText .inlineIcon {
@@ -666,24 +682,33 @@
 
 .actionsStack {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
+}
+
+.actionsStack .actionHint {
+  flex-basis: 100%;
 }
 
 .actionsStack .actionButton {
-  width: 100%;
+  flex: 1;
+  min-width: 140px;
   text-align: center;
+  padding: 11px 20px;
+  font-size: 13px;
 }
 
 .secondaryActionButton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  width: 100%;
+  flex: 1;
+  min-width: 140px;
   box-sizing: border-box;
-  padding: 9px 16px;
+  padding: 9px 20px;
   border-radius: 8px;
   border: 1px solid #d7dee6;
   background: #ffffff;
@@ -755,28 +780,39 @@
   gap: 8px;
 }
 
+.deliveryFeeInputWrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid #d7dee6;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.deliveryFeeInputWrap:focus-within {
+  border-color: #0f6e94;
+  box-shadow: 0 0 0 3px rgba(15, 110, 148, 0.14);
+}
+
 .deliveryFeePrefix {
+  padding-left: 12px;
   font-size: 13px;
   font-weight: 600;
-  color: #6b7686;
+  color: #97a1ae;
 }
 
 .deliveryFeeInput {
   flex: 1;
   min-width: 0;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #d7dee6;
-  background: #ffffff;
+  padding: 8px 10px 8px 6px;
+  border: none;
+  background: transparent;
   font-size: 13px;
   color: #12233e;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.deliveryFeeInput:focus {
-  border-color: #0f6e94;
-  box-shadow: 0 0 0 3px rgba(15, 110, 148, 0.14);
 }
 
 .deliveryFeeButton {
